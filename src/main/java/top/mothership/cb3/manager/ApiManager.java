@@ -37,7 +37,7 @@ public class ApiManager {
             return responseList.get(0);
         }
         log.error("get_user接口查询用户失败: {} 模式：{} 返回：{}", username, mode, result);
-        throw new RuntimeException("get_user接口查询用户失败: " + username + "模式：" + mode);
+        return null;
     }
 
     public ApiV1UserInfoVO getUserInfo(Integer mode, Integer userId) {
@@ -49,7 +49,7 @@ public class ApiManager {
         }
 
         log.error("get_user接口查询用户失败: {} 模式：{} 返回：{}", userId, mode, result);
-        throw new RuntimeException("get_user接口查询用户失败: " + userId + "模式：" + mode);
+        return null;
     }
 
     public ApiV1BeatmapInfoVO getBeatmap(Integer bid) {
@@ -60,7 +60,7 @@ public class ApiManager {
             return responseList.get(0);
         }
         log.error("get_beatmaps接口查询谱面失败: {} 返回：{}", bid, result);
-        throw new RuntimeException("get_beatmaps接口查询谱面失败: " + bid);
+        return null;
     }
 
     public List<ApiV1BeatmapInfoVO> getBeatmaps(Integer sid) {

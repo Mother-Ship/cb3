@@ -8,6 +8,9 @@ import java.time.LocalDate;
 
 @Data
 @TableName("userinfo")
+/**
+ * 这里用基础类型，是因为ppy的API V1返回 在数据为0的时候返回null，借助基础类型进行初始化
+ */
 public class ApiV1UserInfoEntity {
     private Integer id;
 
@@ -15,14 +18,14 @@ public class ApiV1UserInfoEntity {
 
     private int userId;
 
-    private Integer count300;
+    private int count300;
 
-    private Integer count100;
+    private int count100;
 
-    private Integer count50;
+    private int count50;
 
     @TableField("playcount")
-    private Integer playCount;
+    private int playCount;
 
     private float accuracy;
 
