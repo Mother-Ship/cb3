@@ -63,6 +63,10 @@ public class ImportTask {
 
         // 先查出所有被查询过的玩家
         List<Integer> list = userDAO.listUserIdByRole(null, false);
+
+        // 使用CountDownLatch等待所有线程完成
+        CountDownLatch latch = new CountDownLatch(list.size() * 4);
+
         for (Integer userId : list) {
 
             UserRoleEntity user = userDAO.getUser(null, userId);
@@ -93,10 +97,19 @@ public class ImportTask {
                         log.error("任务执行失败: {}", e.getMessage(), e);
                     } finally {
                         semaphore.release(); // 释放信号量许可
+                        latch.countDown(); // 任务完成后计数器减一
                     }
                 });
             }
         }
+
+        // 等待所有线程完成
+        latch.await();
+
+        // 打印结果到日志
+        log.info("录入完成，本次录入标明被封禁玩家： {}", bannedList);
+        log.info("录入成功玩家： {}", successCount.get());
+        log.info("其中已绑定QQ的玩家： {}", boundCount.get());
     }
 
     private void doImportAnUserAndMode(Integer userId, int mode, UserRoleEntity user, Set<String> bannedList, AtomicInteger successCount, AtomicInteger boundCount) throws JsonProcessingException {
