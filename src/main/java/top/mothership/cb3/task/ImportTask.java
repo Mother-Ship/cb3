@@ -17,15 +17,17 @@ import top.mothership.cb3.util.RedisUserInfoUtil;
 import top.mothership.cb3.util.UserRoleDataUtil;
 
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Slf4j
 public class ImportTask {
+    // 线程池配置
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // 固定大小线程池
+    private final Semaphore semaphore = new Semaphore(600); // 每分钟最多触发 600 次
+    private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
     @Autowired
     private RedisUserInfoUtil redisUserInfoUtil;
     @Autowired
@@ -36,11 +38,6 @@ public class ImportTask {
     private ApiManager apiManager;
     @Autowired
     private UserRoleDataUtil userRoleDataUtil;
-
-    // 线程池配置
-    private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // 固定大小线程池
-    private final Semaphore semaphore = new Semaphore(600); // 每分钟最多触发 600 次
-    private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
 
     public ImportTask() {
         // 定时任务：每分钟释放 600 个许可
@@ -64,8 +61,8 @@ public class ImportTask {
         // 先查出所有被查询过的玩家
         List<Integer> list = userDAO.listUserIdByRole(null, false);
 
-        // 使用CountDownLatch等待所有线程完成
-        CountDownLatch latch = new CountDownLatch(list.size() * 4);
+        // 计算所有不跳过的
+        Map<Integer, UserRoleEntity> userMap = new HashMap<>();
 
         for (Integer userId : list) {
 
@@ -75,7 +72,7 @@ public class ImportTask {
             boolean skip = LocalDate.now().minusDays(90).isAfter(user.getLastActiveDate())
                     || user.getQq() == 0;
 
-            // 如果玩家排名小于10000，则不跳过
+            // 如果玩家STD模式排名小于10000，则不跳过
             ApiV1UserInfoEntity nearestUserInfo = userInfoDAO.getNearestUserInfo(0, userId, LocalDate.now().minusDays(2));
             if (nearestUserInfo == null || nearestUserInfo.getPpRank() < 10000) {
                 skip = false;
@@ -84,7 +81,16 @@ public class ImportTask {
             if (skip) {
                 continue;
             }
+            userMap.put(userId, user);
 
+        }
+        log.info("开始导入玩家信息，数据库内共{}玩家，预期录入共{}个玩家", list.size(), userMap.size());
+
+
+        // 使用CountDownLatch等待所有线程完成
+        CountDownLatch latch = new CountDownLatch(userMap.size() * 4);
+
+        for (Integer userId : userMap.keySet()) {
             // 开始录入
             for (int mode = 0; mode < 4; mode++) {
                 // 提交任务到线程池
@@ -92,7 +98,7 @@ public class ImportTask {
                 threadPool.submit(() -> {
                     try {
                         semaphore.acquire(); // 获取信号量许可
-                        doImportAnUserAndMode(userId, finalMode, user, bannedList, successCount, boundCount);
+                        doImportAnUserAndMode(userId, finalMode, userMap.get(userId), bannedList, successCount, boundCount);
                     } catch (Exception e) {
                         log.error("任务执行失败: {}", e.getMessage(), e);
                     } finally {
