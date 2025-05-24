@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: cb3
+  profiles:
+    active: dev
+server:
+  port: 12450

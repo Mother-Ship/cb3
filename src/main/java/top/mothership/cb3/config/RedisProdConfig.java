@@ -1,6 +1,8 @@
 package top.mothership.cb3.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,7 +43,8 @@ public class RedisProdConfig {
     @Value("${redis.database}")
     private int database;
 
-
+    @Autowired
+    ObjectMapper objectMapper;
     @Bean
     public JedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
@@ -85,12 +88,12 @@ public class RedisProdConfig {
         // 使用StringRedisSerializer来序列化和反序列化redis的key
         template.setKeySerializer(new StringRedisSerializer());
         // 使用GenericJackson2JsonRedisSerializer来序列化和反序列化redis的value值
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
 
         // Hash的key也采用StringRedisSerializer的序列化方式
         template.setHashKeySerializer(new StringRedisSerializer());
         // Hash的value也采用GenericJackson2JsonRedisSerializer的序列化方式
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
 
         template.afterPropertiesSet();
         return template;

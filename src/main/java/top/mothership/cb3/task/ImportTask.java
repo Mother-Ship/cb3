@@ -3,7 +3,6 @@ package top.mothership.cb3.task;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,7 +20,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -38,17 +37,29 @@ public class ImportTask {
     @Autowired
     private UserRoleDataUtil userRoleDataUtil;
 
+    // 线程池配置
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // 固定大小线程池
+    private final Semaphore semaphore = new Semaphore(600); // 每分钟最多触发 600 次
+    private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
+
+    public ImportTask() {
+        // 定时任务：每分钟释放 600 个许可
+        scheduler.scheduleAtFixedRate(() -> {
+            semaphore.release(600 - semaphore.availablePermits());
+        }, 0, 1, TimeUnit.MINUTES);
+    }
 
     @Scheduled(cron = "0 8 4 * * ?")
     @SneakyThrows
     public void importUserInfo() {
 
+        log.info("开始导入玩家信息");
         redisUserInfoUtil.flushDb();
         userInfoDAO.clearTodayInfo(LocalDate.now().minusDays(1));
 
         Set<String> bannedList = new LinkedHashSet<>();
         AtomicInteger successCount = new AtomicInteger(0);
-        AtomicInteger bindedCount = new AtomicInteger(0);
+        AtomicInteger boundCount = new AtomicInteger(0);
 
         // 先查出所有被查询过的玩家
         List<Integer> list = userDAO.listUserIdByRole(null, false);
@@ -56,7 +67,7 @@ public class ImportTask {
 
             UserRoleEntity user = userDAO.getUser(null, userId);
 
-            //如果上次活跃在3个月之前，或者没绑定，不录入
+            // 如果上次活跃在3个月之前，或者没绑定，不录入
             boolean skip = LocalDate.now().minusDays(90).isAfter(user.getLastActiveDate())
                     || user.getQq() == 0;
 
@@ -72,15 +83,25 @@ public class ImportTask {
 
             // 开始录入
             for (int mode = 0; mode < 4; mode++) {
-
-                getUserRoleEntity(userId, mode, user, bannedList, successCount, bindedCount);
-
+                // 提交任务到线程池
+                int finalMode = mode;
+                threadPool.submit(() -> {
+                    try {
+                        semaphore.acquire(); // 获取信号量许可
+                        doImportAnUserAndMode(userId, finalMode, user, bannedList, successCount, boundCount);
+                    } catch (Exception e) {
+                        log.error("任务执行失败: {}", e.getMessage(), e);
+                    } finally {
+                        semaphore.release(); // 释放信号量许可
+                    }
+                });
             }
         }
     }
 
-    @NotNull
-    private void getUserRoleEntity(Integer userId, int mode, UserRoleEntity user, Set<String> bannedList, AtomicInteger successCount, AtomicInteger bindedCount) throws JsonProcessingException {
+    private void doImportAnUserAndMode(Integer userId, int mode, UserRoleEntity user, Set<String> bannedList, AtomicInteger successCount, AtomicInteger boundCount) throws JsonProcessingException {
+        // 原有逻辑保持不变
+        log.info("开始导入玩家{}，模式{}", userId, mode);
         ApiV1UserInfoVO userinfo = apiManager.getUserInfo(mode, userId);
 
         if (userinfo == null) {
@@ -99,6 +120,7 @@ public class ImportTask {
         var entity = new ApiV1UserInfoEntity();
         BeanUtils.copyProperties(userinfo, entity);
         entity.setQueryDate(LocalDate.now().minusDays(1));
+        entity.setMode(mode);
         userInfoDAO.addUserInfo(entity);
 
 
@@ -117,7 +139,7 @@ public class ImportTask {
         if (mode == 0) {
             successCount.addAndGet(1);
             if (!user.getQq().equals(0L)) {
-                bindedCount.addAndGet(1);
+                boundCount.addAndGet(1);
             }
         }
 

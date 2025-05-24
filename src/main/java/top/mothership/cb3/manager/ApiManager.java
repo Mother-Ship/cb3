@@ -23,24 +23,44 @@ import java.util.List;
 public class ApiManager {
     private static final String API_BASE_URL = "https://osu.ppy.sh/api";
     private static final OkHttpClient client = new OkHttpClient();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private CustomPropertiesConfig customPropertiesConfig;
 
     public ApiV1UserInfoVO getUserInfo(Integer mode, String username) {
         String result = accessAPI("get_user", "u", username, "type", "string", "m", mode.toString());
-        return parseResponse(result, ApiV1UserInfoVO.class);
+        List<ApiV1UserInfoVO> responseList = parseResponse(result, new TypeReference<>() {
+        });
+        if (responseList != null && !responseList.isEmpty()) {
+            return responseList.get(0);
+        }
+        log.error("get_user接口查询用户失败: {} 模式：{} 返回：{}", username, mode, result);
+        throw new RuntimeException("get_user接口查询用户失败: " + username + "模式：" + mode);
     }
 
     public ApiV1UserInfoVO getUserInfo(Integer mode, Integer userId) {
         String result = accessAPI("get_user", "u", userId.toString(), "type", "id", "m", mode.toString());
-        return parseResponse(result, ApiV1UserInfoVO.class);
+        List<ApiV1UserInfoVO> responseList = parseResponse(result, new TypeReference<List<ApiV1UserInfoVO>>() {
+        });
+        if (responseList != null && !responseList.isEmpty()) {
+            return responseList.get(0);
+        }
+
+        log.error("get_user接口查询用户失败: {} 模式：{} 返回：{}", userId, mode, result);
+        throw new RuntimeException("get_user接口查询用户失败: " + userId + "模式：" + mode);
     }
 
     public ApiV1BeatmapInfoVO getBeatmap(Integer bid) {
         String result = accessAPI("get_beatmaps", "b", bid.toString());
-        return parseResponse(result, new TypeReference<List<ApiV1BeatmapInfoVO>>() {}).get(0);
+        List<ApiV1BeatmapInfoVO> responseList = parseResponse(result, new TypeReference<List<ApiV1BeatmapInfoVO>>() {
+        });
+        if (responseList != null && !responseList.isEmpty()) {
+            return responseList.get(0);
+        }
+        log.error("get_beatmaps接口查询谱面失败: {} 返回：{}", bid, result);
+        throw new RuntimeException("get_beatmaps接口查询谱面失败: " + bid);
     }
 
     public List<ApiV1BeatmapInfoVO> getBeatmaps(Integer sid) {
@@ -51,7 +71,8 @@ public class ApiManager {
 
     public ApiV1BeatmapInfoVO getBeatmap(String hash) {
         String result = accessAPI("get_beatmaps", "h", hash);
-        return parseResponse(result, new TypeReference<List<ApiV1BeatmapInfoVO>>() {}).get(0);
+        return parseResponse(result, new TypeReference<List<ApiV1BeatmapInfoVO>>() {
+        }).get(0);
     }
 
     public List<ApiV1UserBestScoreVO> getBP(Integer mode, String username) {
@@ -78,7 +99,8 @@ public class ApiManager {
         List<ApiV1UserBestScoreVO> resultList = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             String result = accessAPI("get_user_best", "u", username, "type", "string", "m", String.valueOf(i));
-            List<ApiV1UserBestScoreVO> list = parseResponse(result, new TypeReference<List<ApiV1UserBestScoreVO>>() {});
+            List<ApiV1UserBestScoreVO> list = parseResponse(result, new TypeReference<List<ApiV1UserBestScoreVO>>() {
+            });
             for (ApiV1UserBestScoreVO s : list) {
                 s.setMode((byte) i);
             }
@@ -104,12 +126,14 @@ public class ApiManager {
 
     public ApiV1UserRecentScoreVO getRecent(Integer mode, String username) {
         String result = accessAPI("get_user_recent", "u", username, "type", "string", "m", mode.toString());
-        return parseResponse(result, new TypeReference<List<ApiV1UserRecentScoreVO>>() {}).get(0);
+        return parseResponse(result, new TypeReference<List<ApiV1UserRecentScoreVO>>() {
+        }).get(0);
     }
 
     public ApiV1UserRecentScoreVO getRecent(Integer mode, Integer userId) {
         String result = accessAPI("get_user_recent", "u", userId.toString(), "type", "id", "m", mode.toString());
-        return parseResponse(result, new TypeReference<List<ApiV1UserRecentScoreVO>>() {}).get(0);
+        return parseResponse(result, new TypeReference<List<ApiV1UserRecentScoreVO>>() {
+        }).get(0);
     }
 
     // 用于获取所有的recent
@@ -139,7 +163,7 @@ public class ApiManager {
 
     private <T> T parseResponse(String response, TypeReference<T> typeReference) {
         try {
-            return objectMapper.readValue("[" + response + "]", typeReference);
+            return objectMapper.readValue(response, typeReference);
         } catch (IOException e) {
             log.error("Error parsing response", e);
             return null;
@@ -148,7 +172,7 @@ public class ApiManager {
 
     private <T> T parseResponse(String response, Class<T> clazz) {
         try {
-            return objectMapper.readValue("[" + response + "]", clazz);
+            return objectMapper.readValue(response, clazz);
         } catch (IOException e) {
             log.error("Error parsing response", e);
             return null;
@@ -170,7 +194,7 @@ public class ApiManager {
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                log.error("Request failed: {}", response.message());
+                log.error("Request failed,code:{}, message: {}", response.code(), response.message());
                 return null;
             }
             return response.body().string();
