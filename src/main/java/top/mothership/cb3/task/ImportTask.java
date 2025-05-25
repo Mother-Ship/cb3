@@ -40,9 +40,9 @@ public class ImportTask {
     private UserRoleDataUtil userRoleDataUtil;
 
     public ImportTask() {
-        // 定时任务：每分钟释放 600 个许可
+        // 定时任务：每分钟释放 1000 个许可
         scheduler.scheduleAtFixedRate(() -> {
-            semaphore.release(600 - semaphore.availablePermits());
+            semaphore.release(1000 - semaphore.availablePermits());
         }, 0, 1, TimeUnit.MINUTES);
     }
 
@@ -68,18 +68,21 @@ public class ImportTask {
 
             UserRoleEntity user = userDAO.getUser(null, userId);
 
-            // 如果上次活跃在3个月之前，或者没绑定，不录入
-            boolean skip = LocalDate.now().minusDays(90).isAfter(user.getLastActiveDate())
+            // 绑了QQ并且1年内活跃的录入
+            boolean skip = LocalDate.now().minusDays(365).isAfter(user.getLastActiveDate())
                     || user.getQq() == 0;
 
-            // 如果玩家STD模式排名小于10000，则不跳过
+            // 又或者如果玩家STD模式排名小于10000，则录入
             ApiV1UserInfoEntity nearestUserInfo = userInfoDAO.getNearestUserInfo(0, userId, LocalDate.now().minusDays(2));
             if (nearestUserInfo == null || nearestUserInfo.getPpRank() < 10000) {
                 skip = false;
             }
 
             if (skip) {
+                log.info("玩家{}跳过，因为1年内未活跃或者STD模式排名小于10000", userId);
                 continue;
+            }else {
+                log.info("准备导入玩家{}", userId);
             }
             userMap.put(userId, user);
 
