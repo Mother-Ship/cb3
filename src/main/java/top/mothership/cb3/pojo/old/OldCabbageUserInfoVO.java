@@ -1,6 +1,7 @@
 package top.mothership.cb3.pojo.old;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -58,6 +59,7 @@ public class OldCabbageUserInfoVO {
     private int countRankA;
 
     @JsonProperty("queryDate")
+    @JsonSerialize(using = LocalDateCustomSerializer.class)
     private LocalDate queryDate;
 
 }
