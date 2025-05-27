@@ -12,6 +12,7 @@ import top.mothership.cb3.mapper.UserDAO;
 import top.mothership.cb3.mapper.UserInfoDAO;
 import top.mothership.cb3.pojo.domain.ApiV1UserInfoEntity;
 import top.mothership.cb3.pojo.domain.UserRoleEntity;
+import top.mothership.cb3.pojo.old.OldCabbageUserInfoVO;
 import top.mothership.cb3.pojo.osu.apiv1.ApiV1UserInfoVO;
 import top.mothership.cb3.util.RedisUserInfoUtil;
 import top.mothership.cb3.util.UserRoleDataUtil;
@@ -147,7 +148,9 @@ public class ImportTask {
 
 
         //同时加入redis缓存
-        redisUserInfoUtil.addUserInfoToHash(userId, entity);
+        var old = new OldCabbageUserInfoVO();
+        BeanUtils.copyProperties(entity, old);
+        redisUserInfoUtil.addUserInfoToHash(userId, old);
         redisUserInfoUtil.expire(userId, 1, TimeUnit.DAYS);
 
 

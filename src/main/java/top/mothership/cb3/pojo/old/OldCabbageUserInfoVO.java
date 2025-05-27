@@ -1,18 +1,20 @@
-package top.mothership.cb3.pojo.osu.apiv1;
+package top.mothership.cb3.pojo.old;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-/*
-  这里用基础类型，是因为ppy的API V1返回 在数据为0的时候返回null，借助基础类型进行初始化
+
+import java.time.LocalDate;
+
+/**
+ * 为兼容以前代码 字段名没有自动转下划线，因此写一个序列化为JSON后字段名也是驼峰的类
  */
 @Data
-public class ApiV1UserInfoVO {
+public class OldCabbageUserInfoVO {
     private Integer id;
 
     private Integer mode;
 
-    private String username;
-
+    @JsonProperty("userId")
     private int userId;
 
     private int count300;
@@ -26,24 +28,36 @@ public class ApiV1UserInfoVO {
 
     private float accuracy;
 
+    @JsonProperty("ppRaw")
     private float ppRaw;
 
+    @JsonProperty("rankedScore")
     private long rankedScore;
 
+    @JsonProperty("totalScore")
     private long totalScore;
 
     private float level;
 
+    @JsonProperty("ppRank")
     private int ppRank;
 
+    @JsonProperty("countRankSs")
     private int countRankSs;
 
+    @JsonProperty("countRankSsh")
     private int countRankSsh;
 
+    @JsonProperty("countRankS")
     private int countRankS;
 
+    @JsonProperty("countRankSh")
     private int countRankSh;
 
+    @JsonProperty("countRankA")
     private int countRankA;
+
+    @JsonProperty("queryDate")
+    private LocalDate queryDate;
 
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import top.mothership.cb3.pojo.domain.ApiV1UserInfoEntity;
+import top.mothership.cb3.pojo.old.OldCabbageUserInfoVO;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisUserInfoUtil {
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void addUserInfoToHash(Integer userId, ApiV1UserInfoEntity userinfo) {
+    public void addUserInfoToHash(Integer userId, OldCabbageUserInfoVO userinfo) {
         redisTemplate.opsForHash().put(String.valueOf(userId), String.valueOf(userinfo.getMode()), userinfo);
     }
 
