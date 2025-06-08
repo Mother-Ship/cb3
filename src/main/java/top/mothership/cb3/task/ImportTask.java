@@ -3,6 +3,10 @@ package top.mothership.cb3.task;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,6 +21,7 @@ import top.mothership.cb3.pojo.osu.apiv1.ApiV1UserInfoVO;
 import top.mothership.cb3.util.RedisUserInfoUtil;
 import top.mothership.cb3.util.UserRoleDataUtil;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
@@ -39,6 +44,8 @@ public class ImportTask {
     private ApiManager apiManager;
     @Autowired
     private UserRoleDataUtil userRoleDataUtil;
+
+    private static final OkHttpClient client = new OkHttpClient();
 
     public ImportTask() {
         // 定时任务：每分钟释放 1000 个许可
@@ -65,6 +72,7 @@ public class ImportTask {
         // 计算所有不跳过的
         Map<Integer, UserRoleEntity> userMap = new HashMap<>();
 
+        List<Integer> skipped = new ArrayList<>();
         for (Integer userId : list) {
 
             UserRoleEntity user = userDAO.getUser(null, userId);
@@ -80,16 +88,15 @@ public class ImportTask {
             }
 
             if (skip) {
-                log.info("玩家{}跳过，因为1年内未活跃或者STD模式排名小于10000", userId);
+                skipped.add(userId);
                 continue;
-            }else {
-                log.info("准备导入玩家{}", userId);
             }
             userMap.put(userId, user);
 
         }
-        log.info("开始导入玩家信息，数据库内共{}玩家，预期录入共{}个玩家", list.size(), userMap.size());
 
+        log.info("跳过的玩家ID：{}", skipped);
+        log.info("开始导入玩家信息，数据库内共{}玩家，预期录入共{}个玩家", list.size(), userMap.size());
 
         // 使用CountDownLatch等待所有线程完成
         CountDownLatch latch = new CountDownLatch(userMap.size() * 4);
@@ -117,9 +124,30 @@ public class ImportTask {
         latch.await();
 
         // 打印结果到日志
-        log.info("录入完成，本次录入标明被封禁玩家： {}", bannedList);
-        log.info("录入成功玩家： {}", successCount.get());
-        log.info("其中已绑定QQ的玩家： {}", boundCount.get());
+        var result = "录入完成，本次录入标明被封禁玩家：" + bannedList +
+                "录入成功玩家： " + successCount.get() +
+                "其中已绑定QQ的玩家：" + boundCount.get();
+        log.info(result);
+
+        // 通知老白菜服务
+        notifyOldCb(result);
+    }
+
+    private void notifyOldCb(String result) {
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost:8080/api/v1/importInfo").newBuilder();
+        urlBuilder.addQueryParameter("info", result);
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error("Request failed,code:{}, message: {}", response.code(), response.message());
+            }
+        } catch (IOException e) {
+            log.error("Error making request", e);
+        }
     }
 
     private void doImportAnUserAndMode(Integer userId, int mode, UserRoleEntity user, Set<String> bannedList, AtomicInteger successCount, AtomicInteger boundCount) throws JsonProcessingException {
