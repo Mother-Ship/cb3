@@ -3,12 +3,10 @@ package top.mothership.cb3.task;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import top.mothership.cb3.manager.ApiManager;
@@ -30,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Slf4j
 public class ImportTask {
+    private static final OkHttpClient client = new OkHttpClient();
     // 线程池配置
     private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // 固定大小线程池
     private final Semaphore semaphore = new Semaphore(600); // 每分钟最多触发 600 次
@@ -45,8 +44,6 @@ public class ImportTask {
     @Autowired
     private UserRoleDataUtil userRoleDataUtil;
 
-    private static final OkHttpClient client = new OkHttpClient();
-
     public ImportTask() {
         // 定时任务：每分钟释放 1000 个许可
         scheduler.scheduleAtFixedRate(() -> {
@@ -56,6 +53,7 @@ public class ImportTask {
 
     @Scheduled(cron = "0 8 4 * * ?")
     @SneakyThrows
+    @Async
     public void importUserInfo() {
 
         log.info("开始导入玩家信息");
@@ -96,7 +94,10 @@ public class ImportTask {
         }
 
         log.info("跳过的玩家ID：{}", skipped);
-        log.info("开始导入玩家信息，数据库内共{}玩家，预期录入共{}个玩家", list.size(), userMap.size());
+
+        var preparedInfo = "开始导入玩家信息，数据库内共" + list.size() + "玩家，预期录入共" + userMap.size() + "个玩家";
+        log.info(preparedInfo);
+        notifyOldCb(preparedInfo);
 
         // 使用CountDownLatch等待所有线程完成
         CountDownLatch latch = new CountDownLatch(userMap.size() * 4);
@@ -134,16 +135,20 @@ public class ImportTask {
     }
 
     private void notifyOldCb(String result) {
-        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://localhost:8080/api/v1/importInfo").newBuilder();
-        urlBuilder.addQueryParameter("info", result);
+
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        formBuilder.add("info", result);
+
+        RequestBody body = formBuilder.build();
 
         Request request = new Request.Builder()
-                .url(urlBuilder.build())
+                .url("http://localhost:8080/api/v1/importInfo")
+                .post(body)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                log.error("Request failed,code:{}, message: {}", response.code(), response.message());
+                log.error("Request failed, code: {}, message: {}", response.code(), response.message());
             }
         } catch (IOException e) {
             log.error("Error making request", e);
