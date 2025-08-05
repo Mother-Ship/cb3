@@ -51,7 +51,7 @@ public class ImportTask {
         }, 0, 1, TimeUnit.MINUTES);
     }
 
-    @Scheduled(cron = "0 8 4 * * ?")
+    @Scheduled(cron = "0 59 22 * * ?")
     @SneakyThrows
     @Async
     public void importUserInfo() {
@@ -76,24 +76,25 @@ public class ImportTask {
             UserRoleEntity user = userDAO.getUser(null, userId);
 
             // 绑了QQ并且1年内活跃的录入
-            boolean skip = LocalDate.now().minusDays(365).isAfter(user.getLastActiveDate())
+            boolean skip = user.getLastActiveDate().isBefore(LocalDate.now().minusDays(365))
                     || user.getQq() == 0;
-
-            // 又或者如果玩家STD模式排名小于10000，则录入
-            ApiV1UserInfoEntity nearestUserInfo = userInfoDAO.getNearestUserInfo(0, userId, LocalDate.now().minusDays(2));
-            if (nearestUserInfo == null || nearestUserInfo.getPpRank() < 10000) {
-                skip = false;
-            }
-
-            if (skip) {
-                skipped.add(userId);
+            if (!skip) {
+                userMap.put(userId, user);
                 continue;
             }
-            userMap.put(userId, user);
 
+            // 如果不满足上述条件，那就看玩家STD模式排名是否小于10000，是则录入
+            ApiV1UserInfoEntity nearestUserInfo = userInfoDAO.getNearestUserInfo(0, userId, LocalDate.now().minusDays(2));
+            skip = !(nearestUserInfo == null || nearestUserInfo.getRankedScore() < 10000);
+
+            if (!skip) {
+                userMap.put(userId, user);
+            }else {
+                skipped.add(userId);
+            }
         }
 
-        log.info("跳过的玩家ID：{}", skipped);
+        log.info("跳过的玩家ID数量：{}", skipped.size());
 
         var preparedInfo = "开始导入玩家信息，数据库内共" + list.size() + "玩家，预期录入共" + userMap.size() + "个玩家";
         log.info(preparedInfo);
