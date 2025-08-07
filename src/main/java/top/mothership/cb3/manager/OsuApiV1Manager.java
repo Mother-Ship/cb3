@@ -20,7 +20,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ApiManager {
+public class OsuApiV1Manager {
     private static final String API_BASE_URL = "https://osu.ppy.sh/api";
     private static final OkHttpClient client = new OkHttpClient();
 

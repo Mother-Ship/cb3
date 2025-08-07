@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import top.mothership.cb3.manager.ApiManager;
+import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.mapper.UserDAO;
 import top.mothership.cb3.mapper.UserInfoDAO;
 import top.mothership.cb3.pojo.domain.ApiV1UserInfoEntity;
@@ -40,7 +40,7 @@ public class ImportTask {
     @Autowired
     private UserDAO userDAO;
     @Autowired
-    private ApiManager apiManager;
+    private OsuApiV1Manager osuApiV1Manager;
     @Autowired
     private UserRoleDataUtil userRoleDataUtil;
 
@@ -159,7 +159,7 @@ public class ImportTask {
     private void doImportAnUserAndMode(Integer userId, int mode, UserRoleEntity user, Set<String> bannedList, AtomicInteger successCount, AtomicInteger boundCount) throws JsonProcessingException {
         // 原有逻辑保持不变
         log.info("开始导入玩家{}，模式{}", userId, mode);
-        ApiV1UserInfoVO userinfo = apiManager.getUserInfo(mode, userId);
+        ApiV1UserInfoVO userinfo = osuApiV1Manager.getUserInfo(mode, userId);
 
         if (userinfo == null) {
             //将本次获取失败的用户直接设为banned
