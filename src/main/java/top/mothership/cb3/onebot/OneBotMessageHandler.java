@@ -3,10 +3,10 @@ package top.mothership.cb3.onebot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import top.mothership.cb3.command.argument.Sender;
 import top.mothership.cb3.command.context.DataContext;
 import top.mothership.cb3.command.reflect.CbCmdProcessorInfo;
 import top.mothership.cb3.command.reflect.CbCmdProcessorRegistry;
+import top.mothership.cb3.onebot.pojo.OneBotContextData;
 import top.mothership.cb3.onebot.pojo.OneBotEvent;
 
 @Slf4j
@@ -40,9 +40,13 @@ public class OneBotMessageHandler {
                             messageEvent.getMessage(),
                             processorInfo.getClassName() + "." +
                             processorInfo.getMethodName());
+
                     // 设置发送者上下文
-                    DataContext.setSender(
-                            new Sender(messageEvent.getUserId(), messageEvent.getGroupId()));
+                    DataContext.setSender(new OneBotContextData(
+                            messageEvent.getUserId(),
+                            messageEvent.getGroupId(),
+                            messageEvent.getSelfId()
+                    ));
 
                     // 反射调用命令处理器
                     registry.invokeProcessor(processorInfo);

@@ -24,4 +24,5 @@ public class UserRoleEntity {
     private Long speakingCount;
     private String mainRole;
     private LocalDate lastActiveDate;
+    private boolean useLazer;
 }
