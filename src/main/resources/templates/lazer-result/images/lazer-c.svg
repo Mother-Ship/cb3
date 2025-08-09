@@ -1,0 +1,25 @@
+<svg width="291" height="311" viewBox="0 0 291 311" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_1_1057)">
+<mask id="mask0_1_1057" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="62" y="63" width="166" height="185">
+<path d="M187.078 117.978C180.755 112.205 172.234 104.783 154.916 104.783C124.403 104.783 107.36 127.324 107.36 154.813C107.36 182.302 124.678 206.217 155.191 206.217C172.509 206.217 181.58 198.52 188.452 192.198C198.898 182.302 209.894 180.377 220.339 190.548C229.96 199.895 229.96 211.44 220.614 222.71C207.694 237.279 182.13 248 152.717 248C99.9381 248 62.8281 206.217 62.8281 155.363C62.8281 103.683 99.6632 63 153.541 63C181.58 63 206.595 73.4458 218.415 87.4651C228.036 98.4606 226.937 108.631 217.041 118.253C206.87 128.423 197.524 127.599 187.078 117.978Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_1_1057)">
+<g clip-path="url(#paint0_angular_1_1057_clip_path)" data-figma-skip-parse="true"><g transform="matrix(0.108346 0.0288922 -0.0288922 0.108346 144.218 154.789)"><foreignObject x="-1405.94" y="-1405.94" width="2811.87" height="2811.87"><div xmlns="http://www.w3.org/1999/xhtml" style="background:conic-gradient(from 90deg,rgba(254, 217, 145, 1) 0deg,rgba(255, 255, 255, 1) 214.2deg,rgba(255, 255, 255, 1) 360deg);height:100%;width:100%;opacity:1"></div></foreignObject></g></g><circle cx="161.553" cy="154.789" r="114.124" data-figma-gradient-fill="{&#34;type&#34;:&#34;GRADIENT_ANGULAR&#34;,&#34;stops&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.99638891220092773,&#34;g&#34;:0.85100984573364258,&#34;b&#34;:0.57027775049209595,&#34;a&#34;:1.0},&#34;position&#34;:0.0},{&#34;color&#34;:{&#34;r&#34;:1.0,&#34;g&#34;:1.0,&#34;b&#34;:1.0,&#34;a&#34;:1.0},&#34;position&#34;:0.59500002861022949},{&#34;color&#34;:{&#34;r&#34;:1.0,&#34;g&#34;:1.0,&#34;b&#34;:1.0,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;stopsVar&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.99638891220092773,&#34;g&#34;:0.85100984573364258,&#34;b&#34;:0.57027775049209595,&#34;a&#34;:1.0},&#34;position&#34;:0.0},{&#34;color&#34;:{&#34;r&#34;:1.0,&#34;g&#34;:1.0,&#34;b&#34;:1.0,&#34;a&#34;:1.0},&#34;position&#34;:0.59500002861022949},{&#34;color&#34;:{&#34;r&#34;:1.0,&#34;g&#34;:1.0,&#34;b&#34;:1.0,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;transform&#34;:{&#34;m00&#34;:216.69142150878906,&#34;m01&#34;:-57.784389495849609,&#34;m02&#34;:64.764030456542969,&#34;m10&#34;:57.784389495849609,&#34;m11&#34;:216.69142150878906,&#34;m12&#34;:17.551218032836914},&#34;opacity&#34;:1.0,&#34;blendMode&#34;:&#34;NORMAL&#34;,&#34;visible&#34;:true}"/>
+<circle cx="202.002" cy="102.783" r="24.5584" fill="#FFA800"/>
+<path d="M219.337 97.0048C219.337 109.77 208.665 120.119 195.501 120.119C182.337 120.119 171.665 109.77 171.665 97.0048C171.665 84.2394 182.337 73.891 195.501 73.891C208.665 73.891 219.337 84.2394 219.337 97.0048Z" fill="white"/>
+<circle cx="205.613" cy="206.073" r="22.3914" fill="#FFA800"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_1_1057" x="0.188126" y="0.360001" width="290.042" height="310.28" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="31.32"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1057"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1057" result="shape"/>
+</filter>
+<clipPath id="paint0_angular_1_1057_clip_path"><circle cx="161.553" cy="154.789" r="114.124"/></clipPath></defs>
+</svg>

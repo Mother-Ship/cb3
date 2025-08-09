@@ -1,8 +1,7 @@
 package top.mothership.cb3.pojo.osu.apiv2.response;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import top.mothership.cb3.manager.constant.ApiV2ModeHolder;
@@ -24,130 +23,130 @@ public class ApiV2Score {
 
     @Data
     public static class BeatmapScoreLazer {
-        @SerializedName("position")
+        @JsonProperty("position")
         private int position;
 
-        @SerializedName("score")
+        @JsonProperty("score")
         private ScoreLazer score;
     }
 
     @Data
     public static class ScoreLazer {
-        @SerializedName("accuracy")
+        @JsonProperty("accuracy")
         private double accuracy;
 
-        @SerializedName("beatmap_id")
+        @JsonProperty("beatmap_id")
         private long beatmapId;
 
-        @SerializedName("best_id")
+        @JsonProperty("best_id")
         private Long bestId;
 
-        @SerializedName("build_id")
+        @JsonProperty("build_id")
         private Long buildId;
 
-        @SerializedName("classic_total_score")
+        @JsonProperty("classic_total_score")
         private long classicTotalScore;
 
-        @SerializedName("ended_at")
+        @JsonProperty("ended_at")
         private String endedAt;
 
-        @SerializedName("has_replay")
+        @JsonProperty("has_replay")
         private boolean hasReplay;
 
-        @SerializedName("id")
+        @JsonProperty("id")
         private long id;
 
-        @SerializedName("is_perfect_combo")
+        @JsonProperty("is_perfect_combo")
         private boolean isPerfectCombo;
 
-        @SerializedName("legacy_perfect")
+        @JsonProperty("legacy_perfect")
         private boolean legacyPerfect;
 
-        @SerializedName("legacy_score_id")
+        @JsonProperty("legacy_score_id")
         private Long legacyScoreId;
 
-        @SerializedName("legacy_total_score")
+        @JsonProperty("legacy_total_score")
         private long legacyTotalScore;
 
-        @SerializedName("max_combo")
+        @JsonProperty("max_combo")
         private long maxCombo;
 
-        @SerializedName("maximum_statistics")
+        @JsonProperty("maximum_statistics")
         private ScoreStatisticsLazer maximumStatistics;
 
-        @SerializedName("mods")
+        @JsonProperty("mods")
         private Mod[] mods;
 
-        @SerializedName("passed")
+        @JsonProperty("passed")
         private boolean passed;
 
-        @SerializedName("pp")
+        @JsonProperty("pp")
         private Double pp;
 
-        @SerializedName("preserve")
+        @JsonProperty("preserve")
         private boolean preserve;
 
-        @SerializedName("processed")
+        @JsonProperty("processed")
         private boolean processed;
 
-        @SerializedName("rank")
+        @JsonProperty("rank")
         private String rank;
 
-        @SerializedName("ranked")
+        @JsonProperty("ranked")
         private boolean ranked;
 
-        @SerializedName("ruleset_id")
+        @JsonProperty("ruleset_id")
         private int modeInt;
 
-        @SerializedName("started_at")
+        @JsonProperty("started_at")
         private String startedAt;
 
-        @SerializedName("statistics")
+        @JsonProperty("statistics")
         private ScoreStatisticsLazer statistics;
 
-        @SerializedName("total_score")
+        @JsonProperty("total_score")
         private long score;
 
-        @SerializedName("type")
+        @JsonProperty("type")
         private String kind;
 
-        @SerializedName("user_id")
+        @JsonProperty("user_id")
         private long userId;
 
         // SoloScoreJsonAttributesMultiplayer
-        @SerializedName("playlist_item_id")
+        @JsonProperty("playlist_item_id")
         private Long playlistItemId;
 
-        @SerializedName("room_id")
+        @JsonProperty("room_id")
         private Long roomId;
 
-        @SerializedName("solo_score_id")
+        @JsonProperty("solo_score_id")
         private Long soloScoreId;
 
         // ScoreJsonAvailableIncludes
-        @SerializedName("beatmap")
+        @JsonProperty("beatmap")
         private ApiV2Beatmap.Beatmap beatmap;
 
-        @SerializedName("beatmapset")
+        @JsonProperty("beatmapset")
         private ApiV2BeatmapSet.Beatmapset beatmapset;
 
-        @SerializedName("user")
+        @JsonProperty("user")
         private ApiV2User.User user;
 
-        @SerializedName("weight")
+        @JsonProperty("weight")
         private ScoreWeight weight;
 
-        @SerializedName("match")
+        @JsonProperty("match")
         private Match match;
 
-        @SerializedName("rank_country")
+        @JsonProperty("rank_country")
         private Long rankCountry;
 
-        @SerializedName("rank_global")
+        @JsonProperty("rank_global")
         private Long rankGlobal;
 
         // ScoreJsonDefaultIncludes
-        @SerializedName("current_user_attributes")
+        @JsonProperty("current_user_attributes")
         private CurrentUserAttributes currentUserAttributes;
 
         // Tool properties (transient - not serialized)
@@ -182,15 +181,6 @@ public class ApiV2Score {
 
         public double getAccAuto() {
             return isClassic() ? getLegacyAcc() : accuracy;
-        }
-
-        public String getJsonMods() {
-            if (cachedJsonMods != null) {
-                return cachedJsonMods;
-            }
-            Gson gson = new Gson();
-            cachedJsonMods = gson.toJson(mods);
-            return cachedJsonMods;
         }
 
         public ScoreStatisticsLazer getConvertStatistics() {
@@ -330,89 +320,91 @@ public class ApiV2Score {
 
     @Data
     public static class Match implements Serializable {
-        @SerializedName("pass")
+        @JsonProperty("pass")
         private boolean pass;
 
-        @SerializedName("slot")
+        @JsonProperty("slot")
         private long slot;
 
-        @SerializedName("team")
+        @JsonProperty("team")
         private long team;
     }
 
     @Data
-    public static class CurrentUserAttributes implements Serializable{
-        @SerializedName("pin")
+    public static class CurrentUserAttributes implements Serializable {
+        @JsonProperty("pin")
         private CurrentUserPin pin;
     }
 
     @Data
-    public static class CurrentUserPin implements Serializable{
-        @SerializedName("is_pinned")
+    public static class CurrentUserPin implements Serializable {
+        @JsonProperty("is_pinned")
         private boolean isPinned;
 
-        @SerializedName("score_id")
+        @JsonProperty("score_id")
         private long scoreId;
     }
+
     @Data
     public static class ScoreWeight implements Serializable {
-        @SerializedName("percentage")
+        @JsonProperty("percentage")
         public double Percentage;
 
-        @SerializedName("pp")
-        public double PP ;
+        @JsonProperty("pp")
+        public double PP;
     }
+
     @Data
-    public static class ScoreStatisticsLazer implements Serializable{
-        @SerializedName("ok")
+    public static class ScoreStatisticsLazer implements Serializable {
+        @JsonProperty("ok")
         private long countOk;
 
-        @SerializedName("great")
+        @JsonProperty("great")
         private long countGreat;
 
-        @SerializedName("meh")
+        @JsonProperty("meh")
         private long countMeh;
 
-        @SerializedName("perfect")
+        @JsonProperty("perfect")
         private long countGeki;
 
-        @SerializedName("good")
+        @JsonProperty("good")
         private long countKatu;
 
-        @SerializedName("miss")
+        @JsonProperty("miss")
         private long countMiss;
 
-        @SerializedName("large_tick_hit")
+        @JsonProperty("large_tick_hit")
         private long largeTickHit;
 
-        @SerializedName("large_tick_miss")
+        @JsonProperty("large_tick_miss")
         private long largeTickMiss;
 
-        @SerializedName("small_tick_hit")
+        @JsonProperty("small_tick_hit")
         private long smallTickHit;
 
-        @SerializedName("small_tick_miss")
+        @JsonProperty("small_tick_miss")
         private long smallTickMiss;
 
-        @SerializedName("ignore_hit")
+        @JsonProperty("ignore_hit")
         private long ignoreHit;
 
-        @SerializedName("ignore_miss")
+        @JsonProperty("ignore_miss")
         private long ignoreMiss;
 
-        @SerializedName("large_bonus")
+        @JsonProperty("large_bonus")
         private long largeBonus;
 
-        @SerializedName("small_bonus")
+        @JsonProperty("small_bonus")
         private long smallBonus;
 
-        @SerializedName("slider_tail_hit")
+        @JsonProperty("slider_tail_hit")
         private long sliderTailHit;
 
-        @SerializedName("combo_break")
+        @JsonProperty("combo_break")
         private long comboBreak;
 
-        @SerializedName("legacy_combo_increase")
+        @JsonProperty("legacy_combo_increase")
         private long legacyComboIncrease;
 
         public long passedObjects(String mode) {
@@ -470,11 +462,17 @@ public class ApiV2Score {
 
     @Data
     public static class Mod {
-        @SerializedName("acronym")
+        @JsonProperty("acronym")
         private String acronym;
 
-        @SerializedName("settings")
-        private JsonObject settings;
+        @JsonProperty("settings")
+        private ObjectNode settings;
+
+        public static Mod fromString(String mod) {
+            Mod modObj = new Mod();
+            modObj.setAcronym(mod);
+            return modObj;
+        }
 
         public boolean isClassic() {
             return "CL".equals(acronym);
@@ -487,12 +485,6 @@ public class ApiV2Score {
         public boolean isSpeedChangeMod() {
             return "DT".equals(acronym) || "NC".equals(acronym) ||
                     "HT".equals(acronym) || "DC".equals(acronym);
-        }
-
-        public static Mod fromString(String mod) {
-            Mod modObj = new Mod();
-            modObj.setAcronym(mod);
-            return modObj;
         }
     }
 }

@@ -1,0 +1,4 @@
+image:
+  download:
+    cache-path: "/var/app/cache/images"
+    max-cache-size: 5000

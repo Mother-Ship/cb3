@@ -1,8 +1,10 @@
 package top.mothership.cb3.pojo.osu.apiv2.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 import java.net.URI;
@@ -11,70 +13,71 @@ public class ApiV2User {
 
     @Data
     public static class UserExtended extends User {
-        @SerializedName("discord")
+        @JsonProperty("discord")
         private String discord;
 
-        @SerializedName("has_supported")
+        @JsonProperty("has_supported")
         private boolean hasSupported;
 
-        @SerializedName("interests")
+        @JsonProperty("interests")
         private String interests;
 
-        @SerializedName("join_date")
+        @JsonProperty("join_date")
         private String joinDate;
 
-        @SerializedName("kudosu")
-        private JsonObject kudosu;
+        @JsonProperty("kudosu")
+        private ObjectNode kudosu;
 
-        @SerializedName("location")
+        @JsonProperty("location")
         private String location;
 
-        @SerializedName("max_blocks")
+        @JsonProperty("max_blocks")
         private long maxBlocks;
 
-        @SerializedName("max_friends")
+        @JsonProperty("max_friends")
         private long maxFriends;
 
-        @SerializedName("occupation")
+        @JsonProperty("occupation")
         private String occupation;
 
         /**
          * 官网用户的默认游玩模式
          */
-        @SerializedName("playmode")
+        @JsonProperty("playmode")
         private String mode;
 
-        @SerializedName("playstyle")
+        @JsonProperty("playstyle")
         private String[] playstyle;
 
-        @SerializedName("post_count")
+        @JsonProperty("post_count")
         private long postCount;
 
-        @SerializedName("profile_hue")
+        @JsonProperty("profile_hue")
         private Long profileHue;
 
-        @SerializedName("profile_order")
+        @JsonProperty("profile_order")
         private String[] profileOrder;
 
-        @SerializedName("title")
+        @JsonProperty("title")
         private String title;
 
-        @SerializedName("title_url")
+        @JsonProperty("title_url")
         private String titleUrl;
 
-        @SerializedName("twitter")
+        @JsonProperty("twitter")
         private String twitter;
 
-        @SerializedName("website")
+        @JsonProperty("website")
         private String website;
 
-        @SerializedName("comments_count")
+        @JsonProperty("comments_count")
         private long commentsCount;
 
-        @SerializedName("mapping_follower_count")
+        @JsonProperty("mapping_follower_count")
         private Long mappingFollowerCount;
 
         @Override
+        @JsonIgnore
         public UserStatistics getStatistics() {
             if (getStatisticsCurrent() != null) {
                 return getStatisticsCurrent();
@@ -97,161 +100,161 @@ public class ApiV2User {
 
     @Data
     public static class User {
-        @SerializedName("avatar_url")
+        @JsonProperty("avatar_url")
         private URI avatarUrl;
 
-        @SerializedName("country_code")
+        @JsonProperty("country_code")
         private String countryCode;
 
-        @SerializedName("default_group")
+        @JsonProperty("default_group")
         private String defaultGroup;
 
-        @SerializedName("id")
+        @JsonProperty("id")
         private long id;
 
-        @SerializedName("is_active")
+        @JsonProperty("is_active")
         private boolean isActive;
 
-        @SerializedName("is_bot")
+        @JsonProperty("is_bot")
         private boolean isBot;
 
-        @SerializedName("is_deleted")
+        @JsonProperty("is_deleted")
         private boolean isDeleted;
 
-        @SerializedName("is_online")
+        @JsonProperty("is_online")
         private boolean isOnline;
 
-        @SerializedName("is_supporter")
+        @JsonProperty("is_supporter")
         private boolean isSupporter;
 
-        @SerializedName("last_visit")
+        @JsonProperty("last_visit")
         private String lastVisit;
 
-        @SerializedName("pm_friends_only")
+        @JsonProperty("pm_friends_only")
         private boolean pmFriendsOnly;
 
-        @SerializedName("profile_colour")
+        @JsonProperty("profile_colour")
         private String profileColor;
 
-        @SerializedName("username")
+        @JsonProperty("username")
         private String username;
 
         // UserJsonAvailableIncludes
-        @SerializedName("account_history")
+        @JsonProperty("account_history")
         private UserAccountHistory[] accountHistory;
 
-        @SerializedName("badges")
+        @JsonProperty("badges")
         private UserBadge[] badges;
 
-        @SerializedName("beatmap_playcounts_count")
+        @JsonProperty("beatmap_playcounts_count")
         private Long beatmapPlaycountsCount;
 
-        @SerializedName("country")
+        @JsonProperty("country")
         private Country country;
 
-        @SerializedName("cover")
+        @JsonProperty("cover")
         private UserCover cover;
 
-        @SerializedName("favourite_beatmapset_count")
+        @JsonProperty("favourite_beatmapset_count")
         private Long favouriteBeatmapsetCount;
 
-        @SerializedName("follower_count")
+        @JsonProperty("follower_count")
         private Long followerCount;
 
-        @SerializedName("graveyard_beatmapset_count")
+        @JsonProperty("graveyard_beatmapset_count")
         private Long graveyardBeatmapsetCount;
 
-        @SerializedName("guest_beatmapset_count")
+        @JsonProperty("guest_beatmapset_count")
         private Long guestBeatmapsetCount;
 
-        @SerializedName("loved_beatmapset_count")
+        @JsonProperty("loved_beatmapset_count")
         private Long lovedBeatmapsetCount;
 
-        @SerializedName("pending_beatmapset_count")
+        @JsonProperty("pending_beatmapset_count")
         private Long pendingBeatmapsetCount;
 
-        @SerializedName("ranked_beatmapset_count")
+        @JsonProperty("ranked_beatmapset_count")
         private Long rankedBeatmapsetCount;
 
-        @SerializedName("groups")
+        @JsonProperty("groups")
         private UserGroup[] groups;
 
-        @SerializedName("rank_highest")
+        @JsonProperty("rank_highest")
         private UserHighestRank highestRank;
 
-        @SerializedName("is_admin")
+        @JsonProperty("is_admin")
         private Boolean isAdmin;
 
-        @SerializedName("is_bng")
+        @JsonProperty("is_bng")
         private Boolean isBng;
 
-        @SerializedName("is_full_bn")
+        @JsonProperty("is_full_bn")
         private Boolean isFullBn;
 
-        @SerializedName("is_gmt")
+        @JsonProperty("is_gmt")
         private Boolean isGmt;
 
-        @SerializedName("is_limited_bn")
+        @JsonProperty("is_limited_bn")
         private Boolean isLimitedBn;
 
-        @SerializedName("is_moderator")
+        @JsonProperty("is_moderator")
         private Boolean isModerator;
 
-        @SerializedName("is_nat")
+        @JsonProperty("is_nat")
         private Boolean isNat;
 
-        @SerializedName("is_restricted")
+        @JsonProperty("is_restricted")
         private Boolean isRestricted;
 
-        @SerializedName("is_silenced")
+        @JsonProperty("is_silenced")
         private Boolean isSilenced;
 
-        @SerializedName("medals")
+        @JsonProperty("medals")
         private MedalCompact[] medals;
 
-        @SerializedName("monthly_playcounts")
+        @JsonProperty("monthly_playcounts")
         private MonthlyCount[] monthlyPlaycounts;
 
-        @SerializedName("page")
+        @JsonProperty("page")
         private UserPage page;
 
-        @SerializedName("previous_usernames")
+        @JsonProperty("previous_usernames")
         private String[] previousUsernames;
 
         // 搞不懂为啥这里ppy要给两个rankhistory
-        @SerializedName("rank_history")
+        @JsonProperty("rank_history")
         private RankHistory rankHistory;
 
-        @SerializedName("replays_watched_counts")
+        @JsonProperty("replays_watched_counts")
         private MonthlyCount[] replaysWatchedCounts;
 
-        @SerializedName("scores_best_count")
+        @JsonProperty("scores_best_count")
         private Long scoresBestCount;
 
-        @SerializedName("scores_first_count")
+        @JsonProperty("scores_first_count")
         private Long scoresFirstCount;
 
-        @SerializedName("scores_recent_count")
+        @JsonProperty("scores_recent_count")
         private Long scoresRecentCount;
 
-        @SerializedName("scores_pinned_count")
+        @JsonProperty("scores_pinned_count")
         private Long scoresPinnedCount;
 
-        @SerializedName("statistics")
+        @JsonProperty("statistics")
         private UserStatistics statisticsCurrent;
 
-        @SerializedName("statistics_rulesets")
+        @JsonProperty("statistics_rulesets")
         private UserStatisticsModes statisticsModes;
 
-        @SerializedName("support_level")
+        @JsonProperty("support_level")
         private Long supportLevel;
 
-        @SerializedName("active_tournament_banners")
+        @JsonProperty("active_tournament_banners")
         private JsonArray activeTournamentBanners;
 
-        @SerializedName("active_tournament_banner")
+        @JsonProperty("active_tournament_banner")
         private JsonObject activeTournamentBanner;
-
+        @JsonIgnore
         public UserStatistics getStatistics() {
             return statisticsCurrent != null ? statisticsCurrent : statisticsModes.getOsu();
         }
@@ -259,224 +262,224 @@ public class ApiV2User {
 
     @Data
     public static class Country {
-        @SerializedName("code")
+        @JsonProperty("code")
         private String code;
 
-        @SerializedName("display")
+        @JsonProperty("display")
         private String display;
 
-        @SerializedName("name")
+        @JsonProperty("name")
         private String name;
     }
 
     @Data
     public static class UserCover {
-        @SerializedName("custom_url")
+        @JsonProperty("custom_url")
         private URI customUrl;
 
-        @SerializedName("url")
+        @JsonProperty("url")
         private URI url;
 
-        @SerializedName("id")
+        @JsonProperty("id")
         private String id;
     }
 
     @Data
     public static class UserPage {
-        @SerializedName("html")
+        @JsonProperty("html")
         private String html;
 
-        @SerializedName("raw")
+        @JsonProperty("raw")
         private String raw;
     }
 
     @Data
     public static class UserHighestRank {
-        @SerializedName("rank")
+        @JsonProperty("rank")
         private long rank;
 
-        @SerializedName("updated_at")
+        @JsonProperty("updated_at")
         private String updatedAt;
     }
 
     @Data
     public static class RankHistory {
-        @SerializedName("mode")
+        @JsonProperty("mode")
         private String  mode;
 
-        @SerializedName("data")
+        @JsonProperty("data")
         private long[] data;
     }
 
     @Data
     public static class UserStatisticsModes {
-        @SerializedName("osu")
+        @JsonProperty("osu")
         private UserStatistics osu;
 
-        @SerializedName("taiko")
+        @JsonProperty("taiko")
         private UserStatistics taiko;
 
-        @SerializedName("fruits")
+        @JsonProperty("fruits")
         private UserStatistics fruits;
 
-        @SerializedName("mania")
+        @JsonProperty("mania")
         private UserStatistics mania;
     }
 
     @Data
     public static class UserStatistics {
-        @SerializedName("level")
+        @JsonProperty("level")
         private UserLevel level;
 
-        @SerializedName("global_rank")
+        @JsonProperty("global_rank")
         private long globalRank;
 
-        @SerializedName("pp")
+        @JsonProperty("pp")
         private double pp;
 
-        @SerializedName("ranked_score")
+        @JsonProperty("ranked_score")
         private long rankedScore;
 
-        @SerializedName("hit_accuracy")
+        @JsonProperty("hit_accuracy")
         private double hitAccuracy;
 
-        @SerializedName("play_count")
+        @JsonProperty("play_count")
         private long playCount;
 
-        @SerializedName("play_time")
+        @JsonProperty("play_time")
         private long playTime;
 
-        @SerializedName("total_score")
+        @JsonProperty("total_score")
         private long totalScore;
 
-        @SerializedName("total_hits")
+        @JsonProperty("total_hits")
         private long totalHits;
 
-        @SerializedName("maximum_combo")
+        @JsonProperty("maximum_combo")
         private long maximumCombo;
 
-        @SerializedName("replays_watched_by_others")
+        @JsonProperty("replays_watched_by_others")
         private long replaysWatchedByOthers;
 
-        @SerializedName("is_ranked")
+        @JsonProperty("is_ranked")
         private boolean isRanked;
 
-        @SerializedName("grade_counts")
+        @JsonProperty("grade_counts")
         private UserGradeCounts gradeCounts;
 
-        @SerializedName("country_rank")
+        @JsonProperty("country_rank")
         private long countryRank;
 
-        @SerializedName("rank")
+        @JsonProperty("rank")
         private UserRank rank;
     }
 
     @Data
     public static class UserGradeCounts {
-        @SerializedName("ss")
+        @JsonProperty("ss")
         private int ss;
 
-        @SerializedName("ssh")
+        @JsonProperty("ssh")
         private int ssh;
 
-        @SerializedName("s")
+        @JsonProperty("s")
         private int s;
 
-        @SerializedName("sh")
+        @JsonProperty("sh")
         private int sh;
 
-        @SerializedName("a")
+        @JsonProperty("a")
         private int a;
     }
 
     @Data
     public static class UserGroup {
-        @SerializedName("colour")
+        @JsonProperty("colour")
         private String color;
 
-        @SerializedName("description")
+        @JsonProperty("description")
         private String description;
 
-        @SerializedName("has_playmodes")
+        @JsonProperty("has_playmodes")
         private boolean hasModes;
 
-        @SerializedName("id")
+        @JsonProperty("id")
         private long id;
 
-        @SerializedName("identifier")
+        @JsonProperty("identifier")
         private String identifier;
 
-        @SerializedName("is_probationary")
+        @JsonProperty("is_probationary")
         private boolean isProbationary;
 
-        @SerializedName("playmodes")
+        @JsonProperty("playmodes")
         private String[] modes;
 
-        @SerializedName("name")
+        @JsonProperty("name")
         private String name;
 
-        @SerializedName("short_name")
+        @JsonProperty("short_name")
         private String shortName;
     }
 
     @Data
     public static class UserLevel {
-        @SerializedName("current")
+        @JsonProperty("current")
         private int current;
 
-        @SerializedName("progress")
+        @JsonProperty("progress")
         private int progress;
     }
 
     @Data
     public static class MonthlyCount {
-        @SerializedName("start_date")
+        @JsonProperty("start_date")
         private String startDate;
 
-        @SerializedName("count")
+        @JsonProperty("count")
         private int count;
     }
 
     @Data
     public static class UserRank {
-        @SerializedName("country")
+        @JsonProperty("country")
         private int country;
     }
 
 
     @Data
     public static class UserBadge {
-        @SerializedName("awarded_at")
+        @JsonProperty("awarded_at")
         private String awardedAt;
 
-        @SerializedName("description")
+        @JsonProperty("description")
         private String description;
 
-        @SerializedName("image_url")
+        @JsonProperty("image_url")
         private URI imageUrl;
 
-        @SerializedName("url")
+        @JsonProperty("url")
         private URI url;
     }
 
     @Data
     public static class UserAccountHistory {
-        @SerializedName("id")
+        @JsonProperty("id")
         private Long id;
 
-        @SerializedName("timestamp")
+        @JsonProperty("timestamp")
         private String time;
 
-        @SerializedName("description")
+        @JsonProperty("description")
         private String description;
 
-        @SerializedName("type")
+        @JsonProperty("type")
         private HistoryType historyType;
 
-        @SerializedName("length")
+        @JsonProperty("length")
         private long seconds;
 
-        @SerializedName("permanent")
+        @JsonProperty("permanent")
         private boolean permanent;
     }
 

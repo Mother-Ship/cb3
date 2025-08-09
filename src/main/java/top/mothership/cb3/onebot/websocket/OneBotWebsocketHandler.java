@@ -12,11 +12,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import top.mothership.cb3.command.context.DataContext;
 import top.mothership.cb3.onebot.OneBotMessageHandler;
-import top.mothership.cb3.onebot.pojo.OneBotApiRequest;
-import top.mothership.cb3.onebot.pojo.OneBotApiResponse;
-import top.mothership.cb3.onebot.pojo.OneBotEvent;
-import top.mothership.cb3.onebot.pojo.OneBotMessage;
+import top.mothership.cb3.onebot.pojo.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,8 +56,35 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public static void sendMessage(OneBotContextData sender, String message) {
+        OneBotMessage.OneBotApiParams param = new OneBotMessage.SendGroupMsgParams();
+        if (sender.getGroupId() == null){
+            param = new OneBotMessage.SendPrivateMsgParams();
+            ((OneBotMessage.SendPrivateMsgParams) param).setMessage(message);
+        }else {
+            ((OneBotMessage.SendGroupMsgParams) param).setGroupId(DataContext.getSender().getGroupId());
+            ((OneBotMessage.SendGroupMsgParams) param).setMessage(message);
+        }
+
+        OneBotWebsocketHandler.sendMessage(sender.getSelfId(), param);
+    }
+
+
+    public static void sendImage(OneBotContextData sender, String imageBase64) {
+        OneBotMessage.OneBotApiParams param = new OneBotMessage.SendGroupMsgParams();
+        if (sender.getGroupId() == null){
+            param = new OneBotMessage.SendPrivateMsgParams();
+            ((OneBotMessage.SendPrivateMsgParams) param).setMessage("[CQ:image,file=base64://" + imageBase64 + "]");
+        }else {
+            ((OneBotMessage.SendGroupMsgParams) param).setGroupId(DataContext.getSender().getGroupId());
+            ((OneBotMessage.SendGroupMsgParams) param).setMessage("[CQ:image,file=base64://" + imageBase64 + "]");
+        }
+
+        OneBotWebsocketHandler.sendMessage(sender.getSelfId(), param);
+    }
+
     @SneakyThrows
-    public static void sendMessage(Long selfId, OneBotMessage.OneBotApiParams message) {
+    private static void sendMessage(Long selfId, OneBotMessage.OneBotApiParams message) {
 
         String className = message.getClass().getSimpleName();
         String action = switch (className) {

@@ -1,8 +1,7 @@
 package top.mothership.cb3.pojo.osu.apiv2.response;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.Getter;
 
 import java.net.URI;
 
@@ -10,132 +9,119 @@ public class ApiV2Beatmap {
 
     @Data
     public static class Beatmap {
-        @SerializedName("beatmapset_id")
+        @JsonProperty("beatmapset_id")
         private long beatmapsetId;
 
-        @SerializedName("difficulty_rating")
+        @JsonProperty("difficulty_rating")
         private double difficultyRating;
 
-        @SerializedName("id")
+        @JsonProperty("id")
         private long beatmapId;
 
-        @SerializedName("mode")
+        @JsonProperty("mode")
         private String mode;
 
-        @SerializedName("status")
+        @JsonProperty("status")
         private Status status;
 
-        @SerializedName("total_length")
+        @JsonProperty("total_length")
         private long totalLength;
 
-        @SerializedName("user_id")
+        @JsonProperty("user_id")
         private long userId;
 
-        @SerializedName("version")
+        @JsonProperty("version")
         private String version;
 
         // Accuracy = OD
-        @SerializedName("accuracy")
+        @JsonProperty("accuracy")
         private double od;
 
-        @SerializedName("ar")
+        @JsonProperty("ar")
         private double ar;
 
-        @SerializedName("bpm")
+        @JsonProperty("bpm")
         private Double bpm;
 
-        @SerializedName("convert")
+        @JsonProperty("convert")
         private boolean convert;
 
-        @SerializedName("count_circles")
+        @JsonProperty("count_circles")
         private long countCircles;
 
-        @SerializedName("count_sliders")
+        @JsonProperty("count_sliders")
         private long countSliders;
 
-        @SerializedName("count_spinners")
+        @JsonProperty("count_spinners")
         private long countSpinners;
 
-        @SerializedName("cs")
+        @JsonProperty("cs")
         private double cs;
 
-        @SerializedName("deleted_at")
+        @JsonProperty("deleted_at")
         private String deletedAt;
 
-        @SerializedName("drain")
+        @JsonProperty("drain")
         private double hpDrain;
 
-        @SerializedName("hit_length")
+        @JsonProperty("hit_length")
         private long hitLength;
 
-        @SerializedName("is_scoreable")
+        @JsonProperty("is_scoreable")
         private boolean isScoreable;
 
-        @SerializedName("last_updated")
+        @JsonProperty("last_updated")
         private String lastUpdated;
 
-        @SerializedName("mode_int")
+        @JsonProperty("mode_int")
         private int modeInt;
 
-        @SerializedName("passcount")
+        @JsonProperty("passcount")
         private long passcount;
 
-        @SerializedName("playcount")
+        @JsonProperty("playcount")
         private long playcount;
 
-        @SerializedName("ranked")
+        @JsonProperty("ranked")
         private long ranked;
 
-        @SerializedName("url")
+        @JsonProperty("url")
         private URI url;
 
-        @SerializedName("checksum")
+        @JsonProperty("checksum")
         private String checksum;
 
-        @SerializedName("beatmapset")
+        @JsonProperty("beatmapset")
         private ApiV2BeatmapSet.Beatmapset beatmapset;
 
-        @SerializedName("failtimes")
+        @JsonProperty("failtimes")
         private BeatmapFailtimes failtimes;
 
-        @SerializedName("max_combo")
+        @JsonProperty("max_combo")
         private Long maxCombo;
+
+        @JsonProperty("user")
+        private ApiV2User.User user;
     }
 
     @Data
     public static class BeatmapFailtimes {
-        @SerializedName("fail")
+        @JsonProperty("fail")
         private int[] fail;
 
-        @SerializedName("exit")
+        @JsonProperty("exit")
         private int[] exit;
     }
 
-    @Getter
+
     public enum Status {
-        UNKNOWN(""),
-        GRAVEYARD("graveyard"),
-        WIP("wip"),
-        PENDING("pending"),
-        RANKED("ranked"),
-        APPROVED("approved"),
-        QUALIFIED("qualified"),
-        LOVED("loved");
-
-        private final String description;
-
-        Status(String description) {
-            this.description = description;
-        }
-
-        public static Status fromDescription(String description) {
-            for (Status status : values()) {
-                if (status.description.equals(description)) {
-                    return status;
-                }
-            }
-            return UNKNOWN;
-        }
+        graveyard,
+        wip,
+        pending,
+        ranked,
+        approved,
+        qualified,
+        loved
     }
 
 }

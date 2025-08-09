@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/d3.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Torus';
+            src: url('font/Torus-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Torus-Light';
+            src: url('font/Torus-Light.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Torus-Bold';
+            src: url('font/Torus-Bold.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 1920px;
+            height: 1080px;
+            background: transparent;
+            position: relative;
+            font-family: "Torus", "Helvetica Neue", "Segoe UI", "Arial", sans-serif;
+            /*超出container部分隐藏*/
+            overflow: hidden;
+        }
+
+        .beatmap-cover {
+            position: absolute;
+            width: 100%;
+            z-index: -2;
+        }
+
+        .banner {
+            position: absolute;
+            z-index: 0;
+        }
+
+        .bg {
+            position: absolute;
+            z-index: -1;
+        }
+
+        .header {
+            position: absolute;
+            width: 100%;
+            height: 56px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .player-info {
+            position: absolute;
+            left: 1461px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            font-family: "Torus-Light", sans-serif;
+            /*间距8像素*/
+            column-gap: 8px;
+        }
+
+        .avatar {
+            width: 49px;
+            height: 49px;
+            border-radius: 4px;
+            border: 1px solid black;
+        }
+
+        .player-name {
+            font-size: 20px;
+            /*右对齐*/
+            text-align: right;
+            width: 167px;
+            color: white;
+            /* 添加字体外边框 */
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+
+
+        .left-panel {
+            width: 1150px;
+            height: 100%;
+        }
+
+
+        .status-container {
+            position: absolute;
+            border-radius: 10000px;
+            padding: 4px;
+            top: 191px;
+            left: 73px;
+        }
+
+        .status-container.ranked {
+            background: #b3ff66;
+        }
+
+        .status-container.loved {
+            background: #ff66ab;
+        }
+
+        .status-container.approved {
+            background-color: #b3ff66;
+        }
+
+        .status-container.qualified {
+            background: #66ccff;
+        }
+
+        .status-container.pending {
+            background: #ffd966;
+        }
+
+        .status-container.wip {
+            background: #ff9966;
+        }
+
+        .status-container.graveyard {
+            background: #5c6970;
+        }
+
+        .status {
+            font-family: 'Torus-Bold', serif;
+            font-size: 12px;
+            line-height: 8px;
+            position: relative;
+            color: #394642;
+        }
+
+
+        .beatmap-title {
+            position: absolute;
+            font-size: 24px;
+            line-height: 100%;
+            font-weight: bold;
+            left: 72px;
+            top: 210px;
+            width: 530px;
+            text-overflow: ellipsis;
+            color: #fff;
+        }
+
+        .beatmap-artist {
+            position: absolute;
+            font-size: 16px;
+            line-height: 100%;
+            font-weight: bold;
+            left: 72px;
+            top: 237px;
+            width: 530px;
+            text-overflow: ellipsis;
+            color: #fff;
+        }
+
+        #beatmap-star-container {
+            position: absolute;
+            border-radius: 10000px;
+            padding: 4px;
+            top: 266px;
+            left: 72px;
+            background: #AAAAAA
+        }
+
+        .beatmap-star {
+            font-family: 'Torus-Bold', serif;
+            font-size: 12px;
+            line-height: 8px;
+            position: relative;
+            color: #000000;
+        }
+
+
+        #beatmap-diff {
+            position: absolute;
+            display: flex;
+            font-size: 13px;
+            color: #FFFFFF;
+            top: 266px;
+            left: 142px;
+        }
+
+
+        .beatmap-diff-value {
+            font-weight: bold;
+            margin-left: 3px;
+            margin-right: 3px;
+        }
+
+        .score-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .score-number {
+            position: absolute;
+            left: 67px;
+            top: 310px;
+
+            font-family: 'Torus-Light';
+            font-style: normal;
+            font-weight: 300;
+            font-size: 140px;
+            line-height: 100%;
+
+            text-align: center;
+
+            background: linear-gradient(180deg, #FFFFFF 0%, #B2E5FE 100%), #FFFFFF;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .fc-icon {
+            position: absolute;
+            width: 120px;
+            left: 660px;
+            top: 330px;
+        }
+
+
+        .accuracy {
+            position: absolute;
+            font-size: 40px;
+            line-height: 100%;
+            left: 148px;
+            top: 521px;
+
+            background: linear-gradient(180deg, #FFFFFF 0%, #B2E5FE 100%), #FFFFFF;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+
+        }
+
+        .pp {
+            position: absolute;
+            font-size: 40px;
+            line-height: 100%;
+            left: 627px;
+            top: 521px;
+
+            background: linear-gradient(180deg, #FFFFFF 0%, #B2E5FE 100%), #FFFFFF;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+
+        }
+
+        .combo {
+            position: absolute;
+            font-size: 40px;
+            line-height: 100%;
+            left: 388px;
+            top: 521px;
+
+            background: linear-gradient(180deg, #FFFFFF 0%, #B2E5FE 100%), #FFFFFF;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+
+        }
+
+        .stats-container-2 {
+            position: absolute;
+            top: 610px;
+        }
+
+
+        .stats-container-2 .stat-value {
+            position: absolute;
+            font-size: 40px;
+            line-height: 100%;
+        }
+
+        .stats-container-2.std .stat-value.great {
+            left: 133px;
+            background: linear-gradient(90deg, #00FFAA 0%, #7CF6FF 48.5%, #FF9AD7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-container-2.std .stat-value.ok {
+            left: 374px;
+            color: #69ee00;
+        }
+
+        .stats-container-2.std .stat-value.meh {
+            left: 544px;
+            color: #ffb800;
+        }
+
+        .stats-container-2.std .stat-value.miss {
+            left: 713px;
+            color: #ff0000;
+        }
+
+
+
+        .stats-container-2.ctb .stat-value.great {
+            left: 133px;
+            background: linear-gradient(90deg, #00FFAA 0%, #7CF6FF 48.5%, #FF9AD7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-container-2.ctb .stat-value.miss {
+            left: 374px;
+            color: #ff0000;
+        }
+
+
+        .stats-container-2.mania .stat-value.perfect {
+            left: 133px;
+            background: linear-gradient(90deg, #00FFAA 0%, #7CF6FF 48.5%, #FF9AD7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stats-container-2.mania .stat-value.great {
+            left: 374px;
+            color: #ffb800;
+        }
+
+        .stats-container-2.mania .stat-value.good {
+            left: 515px;
+            color: #99EB47;
+        }
+
+
+        .stats-container-2.mania .stat-value.ok {
+            left: 655px;
+            color: #3399CC;
+        }
+
+        .stats-container-2.mania .stat-value.meh {
+            left: 797px;
+            color: #777777;
+        }
+
+        .stats-container-2.mania .stat-value.miss {
+            left: 940px;
+            color: #ff0000;
+        }
+
+        .stats-container-2.taiko .stat-value.great {
+            left: 133px;
+            background: linear-gradient(90deg, #00FFAA 0%, #7CF6FF 48.5%, #FF9AD7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-container-2.taiko .stat-value.ok {
+            left: 374px;
+            color: #99EB47;
+        }
+        .stats-container-2.taiko .stat-value.miss {
+            left: 544px;
+            color: #ff0000;
+        }
+
+        .stats-container-3.std {
+            position: absolute;
+            display: flex;
+            /*水平*/
+            justify-content: space-between;
+            left: 116px;
+            top: 710px;
+        }
+
+        .stats-container-3.ctb {
+            position: absolute;
+            display: flex;
+            /*水平*/
+            justify-content: space-between;
+            left: 116px;
+            top: 710px;
+        }
+
+        .stat-item {
+            width: 160px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            line-height: 100%;
+            font-family: 'Torus-Bold';
+            color: #fff;
+        }
+
+        .stats-container-3 .stat-value {
+            position: absolute;
+            font-size: 28px;
+            line-height: 100%;
+            background: linear-gradient(180deg, #FFFFFF 0%, #B2E5FE 100%), #FFFFFF;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+
+        }
+
+
+        .mods-list {
+            display: flex;
+            flex-wrap: wrap;
+
+            position: absolute;
+            width: 200px;
+            height: 26px;
+            left: 164px;
+            top: 783px;
+        }
+
+        .svg-css-fill{
+            margin-left: -5px;
+            position: relative;
+            width: 37px;
+            height: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            filter: drop-shadow(0px 0.928571px 1.85714px rgba(0, 0, 0, 0.25));
+
+        }
+        .mod-name {
+            font-family: Torus-Bold;
+            position: absolute;
+            font-size: 16px;
+            margin-top: -2px;
+            color: #00000099;
+        }
+
+        .svg-css-fill.diff-reduct svg path {
+            fill: #AADD00;
+        }
+        .svg-css-fill.diff-inc svg path {
+            fill: #FF6666;
+        }
+        .svg-css-fill.automation svg path {
+            fill: #66CCFF;
+        }
+        .svg-css-fill.conversion svg path {
+            fill: #8C66FF;
+        }
+        .svg-css-fill.fun svg path {
+            fill: #FF66AB;
+        }
+
+        .player-info-bottom {
+            position: absolute;
+            height: 60px;
+            width: 650px;
+            overflow: hidden;
+            top: 841px;
+        }
+
+        .global-rank {
+            position: absolute;
+        }
+
+        .avatar-bottom-container {
+            position: absolute;
+            /*transform: skewX(-10deg);*/
+            border-radius: 10px;
+            height: 60px;
+            width: 60px;
+            left: 151px;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .avatar-bottom {
+            position: absolute;
+            height: 60px;
+            /*transform: skewX(10deg)*/
+        }
+
+        .player-cover-container::before {
+            content: " ";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 381.25px;
+            height: 60px;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .player-cover-container {
+            position: absolute;
+            width: 381.25px;
+            height: 60px;
+            left: 171px;
+            border-radius: 10px;
+            overflow: hidden;
+            transform: skewX(-10deg)
+        }
+
+        .player-cover {
+            width: 400px;
+            transform: skewX(10deg)
+        }
+
+        .player-name-bottom {
+            position: absolute;
+            left: 228px;
+            top: 5px;
+            font-family: 'Torus';
+            font-style: normal;
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 24px;
+            color: #FFFFFF;
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+
+        }
+
+        .global-rank {
+            position: absolute;
+            left: 76px;
+            top: 15px;
+            font-family: 'Torus';
+            font-style: normal;
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 24px;
+            color: #FFFFFF;
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        .ended-at {
+            position: absolute;
+            left: 228px;
+            top: 30px;
+        }
+
+        .ended-at-label {
+            font-size: 12px;
+            line-height: 100%;
+            color: #DBF0E9;
+        }
+
+        .ended-at-value {
+            font-size: 12px;
+            line-height: 100%;
+            color: #FFFFFF;
+        }
+
+
+        .right-panel {
+            position: absolute;
+            left: 1210px;
+            top: 229px;
+            width: 622px;
+            height: 622px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            position: absolute;
+            left: 1210px;
+            top: 229px;
+            width: 622px;
+            height: 622px;
+            display: block;
+            margin: 0 auto;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <img class="beatmap-cover" th:src="${beatmapCover}" src="https://assets.ppy.sh/beatmaps/13223/covers/raw.jpg"
+         alt="Beatmap Cover">
+    <img class="banner" th:src="${banner}" src="images/lazer-banner-taiko.png" alt="Banner">
+    <img class="bg" th:src="${bg}" src="images/lazer-bg-taiko.svg" alt="Background">
+
+    <div class="header">
+        <div class="player-info">
+            <div class="player-name" th:text="${username}">MotherShip</div>
+            <img class="avatar" th:src="${avatar}" src="https://a.ppy.sh/15650011?1712387510.jpeg" alt="Avatar">
+        </div>
+    </div>
+
+    <div class="left-panel">
+        <div class="beatmap-info">
+            <div class="status-container approved" th:classappend="${status}">
+                <p class="status" th:text="${status}">APPROVED</p>
+            </div>
+            <div class="beatmap-title" th:text="${title}">Emotional Skyscraper ~ World's End</div>
+            <div class="beatmap-artist" th:text="${artist}">Demetori</div>
+
+            <div id="beatmap-star-container">
+                <p class="beatmap-star" th:text="'★' + ${star}">★ 5.38</p>
+            </div>
+
+            <div id="beatmap-diff">
+                <span class="beatmap-diff-value" th:text="${diff}">Extra Stage</span>
+                <span>Mapped by</span>
+                <span class="beatmap-diff-value" th:text="${mapper}">happy30</span>
+            </div>
+        </div>
+
+        <div class="score-details">
+            <div class="score-main">
+                <div class="score-number" th:text="${#numbers.formatInteger(score, 1, 'COMMA')}">1,234,567</div>
+                <img class="fc-icon" th:src="${fcIcon}" src="images/lazer-fc.svg" alt="">
+            </div>
+            <div class="stats-container-1">
+                <div class="accuracy" th:text="${#numbers.formatDecimal(acc*100, 1, 2)} + '%'">98.76%</div>
+                <div class="pp" th:text="${#numbers.formatDecimal(pp, 1, 2)} + 'PP'">234.56PP</div>
+                <div class="combo" th:text="${maxCombo} + 'x'">1234x</div>
+            </div>
+
+<!--            <div class="stats-container-2 std" th:if="${mode == 'std'}">-->
+<!--                <div class="stat-value great"-->
+<!--                     th:text="${great}">123-->
+<!--                </div>-->
+<!--                <div class="stat-value ok" th:text="${ok}">123</div>-->
+<!--                <div class="stat-value meh" th:text="${meh}">123</div>-->
+<!--                <div class="stat-value miss" th:text="${miss}">123</div>-->
+
+<!--            </div>-->
+<!--                        <div class="stats-container-2 mania" th:if="${mode == 'mania'}">-->
+<!--                            <div class="stat-value perfect" th:text="${perfect}">123</div>-->
+
+<!--                            <div class="stat-value great"-->
+<!--                                 th:text="${great}">123-->
+<!--                            </div>-->
+
+<!--                            <div class="stat-value good" th:text="${good}">123</div>-->
+<!--                            <div class="stat-value ok" th:text="${ok}">123</div>-->
+<!--                            <div class="stat-value meh" th:text="${meh}">123</div>-->
+<!--                            <div class="stat-value miss" th:text="${miss}">123</div>-->
+<!--                            -->
+<!--                        </div>-->
+
+
+<!--                        <div class="stats-container-2 ctb" th:if="${mode == 'fruit'}">-->
+<!--                            <div class="stat-value great"-->
+<!--                                 th:text="${great}">123-->
+<!--                            </div>-->
+<!--                            <div class="stat-value miss" th:text="${miss}">123</div>-->
+<!--                        </div>-->
+
+                        <div class="stats-container-2 taiko" th:if="${mode == 'taiko'}">
+                            <div class="stat-value great"
+                                 th:text="${great}">123
+                            </div>
+                            <div class="stat-value ok" th:text="${ok}">123</div>
+                            <div class="stat-value miss" th:text="${miss}">123</div>
+
+                        </div>
+
+<!--            <div class="stats-container-3 std">-->
+<!--                <div class="stat-item" th:if="${sliderEnd != null}">-->
+<!--                    <div class="stat-label">SLIDER END</div>-->
+<!--                    <div class="stat-value" th:text="${sliderEnd}">123</div>-->
+<!--                </div>-->
+<!--                <div class="stat-item" th:if="${sliderTick != null}">-->
+<!--                    <div class="stat-label">SLIDER TICK</div>-->
+<!--                    <div class="stat-value" th:text="${sliderTick}">123</div>-->
+<!--                </div>-->
+<!--                <div class="stat-item" th:if="${spinnerSpin != null}">-->
+<!--                    <div class="stat-label">SPINNER SPIN</div>-->
+<!--                    <div class="stat-value" th:text="${spinnerSpin}">123</div>-->
+<!--                </div>-->
+<!--                <div class="stat-item" th:if="${spinnerBonus != null}">-->
+<!--                    <div class="stat-label">SPINNER BONUS</div>-->
+<!--                    <div class="stat-value" th:text="${spinnerBonus}">123</div>-->
+<!--                </div>-->
+
+<!--            </div>-->
+
+<!--            <div class="stats-container-3 ctb">-->
+<!--                <div class="stat-item" th:if="${largeDroplet != null}">-->
+<!--                    <div class="stat-label">Large Droplet</div>-->
+<!--                    <div class="stat-value" th:text="${largeDroplet}">123</div>-->
+<!--                </div>-->
+<!--                <div class="stat-item" th:if="${smallDroplet != null}">-->
+<!--                    <div class="stat-label">Small Droplet</div>-->
+<!--                    <div class="stat-value" th:text="${smallDroplet}">123</div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <div class="mods-list">
+                <div class="svg-css-fill diff-inc">
+                    <p class="mod-name">HD</p>
+                    <svg width="37" height="26" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M25.5633 69.7157C25.1516 69.69 24.7528 69.69 24.3411 69.6514C23.5306 69.5742 22.7201 69.4198 21.9354 69.1882C20.7647 68.8409 19.6325 68.3263 18.6033 67.6701C17.5741 67.014 16.635 66.2035 15.8373 65.2772C15.1298 64.4539 15.0011 64.1966 14.4222 63.2832L1.72439 41.2839C1.22265 40.3191 1.06827 40.0875 0.708047 39.0583C0.309231 37.9004 0.0776602 36.6911 0.0133349 35.4689C-0.0509903 34.2468 0.0776602 33.0117 0.360691 31.8281C0.553667 31.0305 0.823833 30.2586 1.15832 29.5124C1.32557 29.1393 1.53141 28.792 1.72439 28.4189L14.4222 6.43252C15.014 5.5191 15.1298 5.2618 15.8373 4.43844C16.635 3.51216 17.5741 2.70166 18.6033 2.04554C19.6325 1.38942 20.7647 0.874823 21.9354 0.527467C22.7201 0.295896 23.5178 0.141516 24.3411 0.0643252C24.7528 0.0257301 25.1516 0.0257301 25.5633 0H74.4376C75.5183 0.0514602 75.8013 0.0257301 76.8691 0.231571C78.0784 0.463142 79.2363 0.861958 80.3298 1.42802C81.4233 1.99408 82.4268 2.70166 83.3145 3.55075C83.9063 4.11681 84.4466 4.73434 84.9098 5.40332C85.1413 5.73781 85.3472 6.08517 85.5659 6.43252L98.2637 28.4189C98.4567 28.7791 98.6496 29.1393 98.8298 29.5124C99.1642 30.2586 99.4344 31.0305 99.6274 31.8281C99.9104 33.0246 100.039 34.2468 99.9747 35.4689C99.9104 36.6911 99.6788 37.9133 99.28 39.0583C98.9198 40.0875 98.7654 40.3191 98.2637 41.2839L85.5659 63.2703C84.9741 64.1837 84.8583 64.441 84.1507 65.2644C83.3531 66.1907 82.4139 67.0012 81.3847 67.6573C80.3555 68.3134 79.2234 68.828 78.0527 69.1754C77.2679 69.4069 76.4703 69.5613 75.6469 69.6385C75.2353 69.6771 74.8364 69.6771 74.4248 69.7028C58.1505 69.7157 41.8505 69.7157 25.5633 69.7157Z"/>
+                    </svg>
+                </div>
+
+                <div class="svg-css-fill diff-inc">
+                    <p class="mod-name">HR</p>
+                    <svg width="37" height="26" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M25.5633 69.7157C25.1516 69.69 24.7528 69.69 24.3411 69.6514C23.5306 69.5742 22.7201 69.4198 21.9354 69.1882C20.7647 68.8409 19.6325 68.3263 18.6033 67.6701C17.5741 67.014 16.635 66.2035 15.8373 65.2772C15.1298 64.4539 15.0011 64.1966 14.4222 63.2832L1.72439 41.2839C1.22265 40.3191 1.06827 40.0875 0.708047 39.0583C0.309231 37.9004 0.0776602 36.6911 0.0133349 35.4689C-0.0509903 34.2468 0.0776602 33.0117 0.360691 31.8281C0.553667 31.0305 0.823833 30.2586 1.15832 29.5124C1.32557 29.1393 1.53141 28.792 1.72439 28.4189L14.4222 6.43252C15.014 5.5191 15.1298 5.2618 15.8373 4.43844C16.635 3.51216 17.5741 2.70166 18.6033 2.04554C19.6325 1.38942 20.7647 0.874823 21.9354 0.527467C22.7201 0.295896 23.5178 0.141516 24.3411 0.0643252C24.7528 0.0257301 25.1516 0.0257301 25.5633 0H74.4376C75.5183 0.0514602 75.8013 0.0257301 76.8691 0.231571C78.0784 0.463142 79.2363 0.861958 80.3298 1.42802C81.4233 1.99408 82.4268 2.70166 83.3145 3.55075C83.9063 4.11681 84.4466 4.73434 84.9098 5.40332C85.1413 5.73781 85.3472 6.08517 85.5659 6.43252L98.2637 28.4189C98.4567 28.7791 98.6496 29.1393 98.8298 29.5124C99.1642 30.2586 99.4344 31.0305 99.6274 31.8281C99.9104 33.0246 100.039 34.2468 99.9747 35.4689C99.9104 36.6911 99.6788 37.9133 99.28 39.0583C98.9198 40.0875 98.7654 40.3191 98.2637 41.2839L85.5659 63.2703C84.9741 64.1837 84.8583 64.441 84.1507 65.2644C83.3531 66.1907 82.4139 67.0012 81.3847 67.6573C80.3555 68.3134 79.2234 68.828 78.0527 69.1754C77.2679 69.4069 76.4703 69.5613 75.6469 69.6385C75.2353 69.6771 74.8364 69.6771 74.4248 69.7028C58.1505 69.7157 41.8505 69.7157 25.5633 69.7157Z"/>
+                    </svg>
+                </div>
+
+                <div class="svg-css-fill diff-inc">
+                    <p class="mod-name">NC</p>
+                    <svg width="37" height="26" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M25.5633 69.7157C25.1516 69.69 24.7528 69.69 24.3411 69.6514C23.5306 69.5742 22.7201 69.4198 21.9354 69.1882C20.7647 68.8409 19.6325 68.3263 18.6033 67.6701C17.5741 67.014 16.635 66.2035 15.8373 65.2772C15.1298 64.4539 15.0011 64.1966 14.4222 63.2832L1.72439 41.2839C1.22265 40.3191 1.06827 40.0875 0.708047 39.0583C0.309231 37.9004 0.0776602 36.6911 0.0133349 35.4689C-0.0509903 34.2468 0.0776602 33.0117 0.360691 31.8281C0.553667 31.0305 0.823833 30.2586 1.15832 29.5124C1.32557 29.1393 1.53141 28.792 1.72439 28.4189L14.4222 6.43252C15.014 5.5191 15.1298 5.2618 15.8373 4.43844C16.635 3.51216 17.5741 2.70166 18.6033 2.04554C19.6325 1.38942 20.7647 0.874823 21.9354 0.527467C22.7201 0.295896 23.5178 0.141516 24.3411 0.0643252C24.7528 0.0257301 25.1516 0.0257301 25.5633 0H74.4376C75.5183 0.0514602 75.8013 0.0257301 76.8691 0.231571C78.0784 0.463142 79.2363 0.861958 80.3298 1.42802C81.4233 1.99408 82.4268 2.70166 83.3145 3.55075C83.9063 4.11681 84.4466 4.73434 84.9098 5.40332C85.1413 5.73781 85.3472 6.08517 85.5659 6.43252L98.2637 28.4189C98.4567 28.7791 98.6496 29.1393 98.8298 29.5124C99.1642 30.2586 99.4344 31.0305 99.6274 31.8281C99.9104 33.0246 100.039 34.2468 99.9747 35.4689C99.9104 36.6911 99.6788 37.9133 99.28 39.0583C98.9198 40.0875 98.7654 40.3191 98.2637 41.2839L85.5659 63.2703C84.9741 64.1837 84.8583 64.441 84.1507 65.2644C83.3531 66.1907 82.4139 67.0012 81.3847 67.6573C80.3555 68.3134 79.2234 68.828 78.0527 69.1754C77.2679 69.4069 76.4703 69.5613 75.6469 69.6385C75.2353 69.6771 74.8364 69.6771 74.4248 69.7028C58.1505 69.7157 41.8505 69.7157 25.5633 69.7157Z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="player-info-bottom">
+            <div class="global-rank" th:text="'#' + ${globalRank}">#9999</div>
+
+            <div class="avatar-bottom-container">
+                <img class="avatar-bottom" th:src="${avatar}" src="https://a.ppy.sh/15650011?1712387510.jpeg"
+                     alt="Avatar">
+
+            </div>
+
+            <div class="player-cover-container">
+                <img class="player-cover" th:src="${playerCover}"
+                     src="https://assets.ppy.sh/user-profile-covers/15650011/42693d1af8a3024f4f3d636afaa4bf79502b4df340e87136ecd344e1554663e9.jpeg"
+                     alt="Avatar">
+            </div>
+
+            <div class="player-name-bottom" th:text="${username}">MotherShip</div>
+            <div class="ended-at">
+                <span class="ended-at-label">Achieved on </span>
+                <span class="ended-at-value" th:text="${endedAt}">2025/02/03 12:34</span>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas" width="623" height="623"></canvas>
+
+    <div class="right-panel">
+        <img class="rank-icon" th:src="${rankIcon}" src="images/lazer-x.svg" alt="">
+    </div>
+
+
+</div>
+
+<script th:inline="javascript">
+    class ArcDrawer {
+        constructor(canvas) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext('2d');
+            this.centerX = canvas.width / 2;
+            this.centerY = canvas.height / 2;
+
+
+            this.outerRadius = 305;
+            this.innerRadius = 288;
+            this.lineWidth = 28;
+
+            // 渐变颜色（基于原SVG）
+            this.startColor = 'rgba(124, 245, 255, 1)'; // #7CF5FF
+            this.endColor = 'rgba(186, 255, 168, 1)';   // #BAFF98
+        }
+
+        createGradient(startAngle, endAngle) {
+            // 创建左右线性渐变
+            const gradient = this.ctx.createLinearGradient(
+                this.centerX - this.outerRadius, // 左边界
+                this.centerY,
+                this.centerX + this.outerRadius, // 右边界
+                this.centerY
+            );
+
+            gradient.addColorStop(0, this.startColor);
+            gradient.addColorStop(1, this.endColor);
+
+            return gradient;
+        }
+
+        drawArc(endAngle, rotation = 0) {
+            this.endAngle = endAngle;
+            this.rotation = rotation;
+
+            // 清除画布
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+            // 转换为弧度
+            const startAngleRad = (rotation - 90) * Math.PI / 180; // 从顶部开始
+            const endAngleRad = (rotation - 90 + endAngle) * Math.PI / 180;
+
+            // 设置线条样式
+            this.ctx.lineWidth = this.lineWidth;
+            this.ctx.lineCap = 'round';
+            this.ctx.strokeStyle = this.createGradient(0, endAngle);
+
+            // 绘制圆弧
+            this.ctx.beginPath();
+            this.ctx.arc(
+                this.centerX,
+                this.centerY,
+                (this.outerRadius + this.innerRadius) / 2,
+                startAngleRad,
+                endAngleRad
+            );
+            this.ctx.stroke();
+
+            // 如果不是完整圆，绘制端点
+            if (endAngle < 360) {
+                this.drawEndCap(endAngleRad);
+            }
+
+            if (endAngle > 0) {
+                this.drawStartCap(startAngleRad);
+            }
+        }
+
+        drawEndCap(angle) {
+            const radius = (this.outerRadius + this.innerRadius) / 2;
+            const x = this.centerX + Math.cos(angle) * radius;
+            const y = this.centerY + Math.sin(angle) * radius;
+
+            // 根据端点的x位置确定颜色（左右渐变）
+            const normalizedX = (x - (this.centerX - this.outerRadius)) / (2 * this.outerRadius);
+            const clampedX = Math.max(0, Math.min(1, normalizedX));
+
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, this.lineWidth / 2, 0, Math.PI * 2);
+            this.ctx.fillStyle = this.interpolateColor(this.startColor, this.endColor, clampedX);
+            this.ctx.fill();
+        }
+
+        drawStartCap(angle) {
+            const radius = (this.outerRadius + this.innerRadius) / 2;
+            const x = this.centerX + Math.cos(angle) * radius;
+            const y = this.centerY + Math.sin(angle) * radius;
+
+            // 根据端点的x位置确定颜色（左右渐变）
+            const normalizedX = (x - (this.centerX - this.outerRadius)) / (2 * this.outerRadius);
+            const clampedX = Math.max(0, Math.min(1, normalizedX));
+
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, this.lineWidth / 2, 0, Math.PI * 2);
+            this.ctx.fillStyle = this.interpolateColor(this.startColor, this.endColor, clampedX);
+            this.ctx.fill();
+        }
+
+        // 颜色插值函数
+        interpolateColor(color1, color2, factor) {
+            // 解析rgba颜色
+            const parseColor = (color) => {
+                const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([^)]+))?\)/);
+                return {
+                    r: parseInt(match[1]),
+                    g: parseInt(match[2]),
+                    b: parseInt(match[3]),
+                    a: match[4] ? parseFloat(match[4]) : 1
+                };
+            };
+
+            const c1 = parseColor(color1);
+            const c2 = parseColor(color2);
+
+            const r = Math.round(c1.r + (c2.r - c1.r) * factor);
+            const g = Math.round(c1.g + (c2.g - c1.g) * factor);
+            const b = Math.round(c1.b + (c2.b - c1.b) * factor);
+            const a = c1.a + (c2.a - c1.a) * factor;
+
+            return `rgba(${r}, ${g}, ${b}, ${a})`;
+        }
+    }
+
+    // 初始化
+    const canvas = document.getElementById('canvas');
+    const arcDrawer = new ArcDrawer(canvas);
+
+    function updateArc(endAngle) {
+        arcDrawer.drawArc(endAngle, 0);
+    }
+
+    updateArc(270);
+
+
+    // 狂抄lazer
+    const difficultyColourSpectrum = d3.scaleLinear()
+        .domain([0.1, 1.25, 2, 2.5, 3.3, 4.2, 4.9, 5.8, 6.7, 7.7, 9])
+        .clamp(true)
+        .range(['#4290FB', '#4FC0FF', '#4FFFD5', '#7CFF4F', '#F6F05C', '#FF8068', '#FF4E6F', '#C645B8', '#6563DE', '#18158E', '#000000'])
+        .interpolate(d3.interpolateRgb.gamma(2.2));
+
+    function getDiffColour(rating) {
+        if (rating < 0.1) return '#AAAAAA';
+        if (rating >= 9) return '#000000';
+        return difficultyColourSpectrum(rating);
+    }
+
+    document.getElementById("beatmap-star-container").style.backgroundColor =
+        getDiffColour(5.38);
+    // getDiffColour([[${star}]]);
+    if (5.38 >= 6.50) {
+        // if ([[${star}]] >= 6.50) {
+        document.getElementById("beatmap-star").style.color = "#FFD966";
+    }
+</script>
+</body>
+</html>

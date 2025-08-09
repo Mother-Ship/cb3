@@ -1,6 +1,6 @@
 package top.mothership.cb3.pojo.osu.apiv2.response;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.net.URI;
@@ -9,161 +9,161 @@ public class ApiV2BeatmapSet {
 
     @Data
     public static class Beatmapset {
-        @SerializedName("artist")
+        @JsonProperty("artist")
         private String artist;
 
-        @SerializedName("artist_unicode")
+        @JsonProperty("artist_unicode")
         private String artistUnicode;
 
-        @SerializedName("covers")
+        @JsonProperty("covers")
         private BeatmapCovers covers;
 
-        @SerializedName("creator")
+        @JsonProperty("creator")
         private String creator;
 
-        @SerializedName("favourite_count")
+        @JsonProperty("favourite_count")
         private long favouriteCount;
 
-        @SerializedName("hype")
+        @JsonProperty("hype")
         private BeatmapHype hype;
 
-        @SerializedName("id")
+        @JsonProperty("id")
         private long id;
 
-        @SerializedName("nsfw")
+        @JsonProperty("nsfw")
         private boolean isNsfw;
 
-        @SerializedName("offset")
+        @JsonProperty("offset")
         private long offset;
 
-        @SerializedName("play_count")
+        @JsonProperty("play_count")
         private long playCount;
 
-        @SerializedName("preview_url")
+        @JsonProperty("preview_url")
         private String previewUrl;
 
-        @SerializedName("source")
+        @JsonProperty("source")
         private String source;
 
-        @SerializedName("spotlight")
+        @JsonProperty("spotlight")
         private boolean spotlight;
 
-        @SerializedName("status")
+        @JsonProperty("status")
         private String status;
 
-        @SerializedName("title")
+        @JsonProperty("title")
         private String title;
 
-        @SerializedName("title_unicode")
+        @JsonProperty("title_unicode")
         private String titleUnicode;
 
-        @SerializedName("user_id")
+        @JsonProperty("user_id")
         private long userId;
 
-        @SerializedName("video")
+        @JsonProperty("video")
         private boolean video;
 
-        @SerializedName("availability")
+        @JsonProperty("availability")
         private BeatmapAvailability availability;
 
-        @SerializedName("bpm")
+        @JsonProperty("bpm")
         private long bpm;
 
-        @SerializedName("can_be_hyped")
+        @JsonProperty("can_be_hyped")
         private boolean canBeHyped;
 
-        @SerializedName("discussion_enabled")
+        @JsonProperty("discussion_enabled")
         private boolean discussionEnabled;
 
-        @SerializedName("discussion_locked")
+        @JsonProperty("discussion_locked")
         private boolean discussionLocked;
 
-        @SerializedName("is_scoreable")
+        @JsonProperty("is_scoreable")
         private boolean isScoreable;
 
-        @SerializedName("last_updated")
+        @JsonProperty("last_updated")
         private String lastUpdated;
 
-        @SerializedName("legacy_thread_url")
+        @JsonProperty("legacy_thread_url")
         private URI legacyThreadUrl;
 
-        @SerializedName("nominations_summary")
+        @JsonProperty("nominations_summary")
         private NominationsSummary nominationsSummary;
 
-        @SerializedName("ranked")
+        @JsonProperty("ranked")
         private long ranked;
 
-        @SerializedName("ranked_date")
+        @JsonProperty("ranked_date")
         private String rankedDate;
 
-        @SerializedName("storyboard")
+        @JsonProperty("storyboard")
         private boolean storyboard;
 
-        @SerializedName("submitted_date")
+        @JsonProperty("submitted_date")
         private String submittedDate;
 
-        @SerializedName("tags")
+        @JsonProperty("tags")
         private String tags;
 
-        @SerializedName("ratings")
+        @JsonProperty("ratings")
         private long[] ratings;
 
-        @SerializedName("beatmaps")
+        @JsonProperty("beatmaps")
         private ApiV2Beatmap[] beatmaps;
 
     }
 
     @Data
     public static class BeatmapAvailability {
-        @SerializedName("download_disabled")
+        @JsonProperty("download_disabled")
         private boolean downloadDisabled;
 
-        @SerializedName("more_information")
+        @JsonProperty("more_information")
         private String moreInformation;
     }
 
     @Data
     public static class BeatmapCovers {
-        @SerializedName("cover")
+        @JsonProperty("cover")
         private String cover;
 
-        @SerializedName("cover@2x")
+        @JsonProperty("cover@2x")
         private String cover2x;
 
-        @SerializedName("card")
+        @JsonProperty("card")
         private String card;
 
-        @SerializedName("card@2x")
+        @JsonProperty("card@2x")
         private String card2x;
 
-        @SerializedName("list")
+        @JsonProperty("list")
         private String list;
 
-        @SerializedName("list@2x")
+        @JsonProperty("list@2x")
         private String list2x;
 
-        @SerializedName("slimcover")
+        @JsonProperty("slimcover")
         private String slimCover;
 
-        @SerializedName("slimcover@2x")
+        @JsonProperty("slimcover@2x")
         private String slimCover2x;
     }
 
     @Data
     public static class BeatmapHype {
-        @SerializedName("current")
+        @JsonProperty("current")
         private int current;
 
-        @SerializedName("required")
+        @JsonProperty("required")
         private int required;
     }
 
     @Data
     public static class NominationsSummary {
-        @SerializedName("current")
+        @JsonProperty("current")
         private int current;
 
-        @SerializedName("required")
+        @JsonProperty("required")
         private int required;
     }
 
