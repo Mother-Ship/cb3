@@ -108,8 +108,8 @@ public class HtmlGenerateService {
                 );
             }
         });
-        // 左下角排名、时间
-        context.setVariable("globalRank", score.getRankGlobal());
+        // 左下角时间
+//       本来设计图这儿有个排名的，但是API不会返回这个字段，所以删了
         // 把UTC时区2025-05-09T23:05:38Z格式的endedAt格式化为+8时区的时间，再格式化为2025/02/03 12:34格式
         var endedAtStr = score.getEndedAt();
         endedAtStr = endedAtStr.substring(0, endedAtStr.length() - 1) + "+08:00";

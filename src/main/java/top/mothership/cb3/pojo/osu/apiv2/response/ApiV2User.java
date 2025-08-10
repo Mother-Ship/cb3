@@ -2,9 +2,8 @@ package top.mothership.cb3.pojo.osu.apiv2.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import lombok.Data;
 
 import java.net.URI;
@@ -250,10 +249,10 @@ public class ApiV2User {
         private Long supportLevel;
 
         @JsonProperty("active_tournament_banners")
-        private JsonArray activeTournamentBanners;
+        private ArrayNode activeTournamentBanners;
 
         @JsonProperty("active_tournament_banner")
-        private JsonObject activeTournamentBanner;
+        private ObjectNode activeTournamentBanner;
         @JsonIgnore
         public UserStatistics getStatistics() {
             return statisticsCurrent != null ? statisticsCurrent : statisticsModes.getOsu();

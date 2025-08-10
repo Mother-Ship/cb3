@@ -2,7 +2,6 @@ package top.mothership.cb3.onebot.websocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +30,19 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
     private final ExecutorService fixedThreadPool = Executors.newFixedThreadPool(100);
     @Autowired
     private OneBotMessageHandler oneBotMessageHandler;
+
+    private static ObjectMapper objectMapper;
     @Autowired
-    private ObjectMapper objectMapper;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        OneBotWebsocketHandler.objectMapper = objectMapper;
+    }
+
 
     @SneakyThrows
     public static String callApi(Long selfId, OneBotApiRequest request) {
         WebSocketSession session = SESSION_MAP.get(String.valueOf(selfId));
         if (session != null) {
-            session.sendMessage(new TextMessage(new Gson().toJson(request)));
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(request)));
         }
         // 自旋等待返回值map里出现要的返回值，直到次数上限
         int retry = 0;
@@ -60,6 +64,7 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
         OneBotMessage.OneBotApiParams param = new OneBotMessage.SendGroupMsgParams();
         if (sender.getGroupId() == null){
             param = new OneBotMessage.SendPrivateMsgParams();
+            ((OneBotMessage.SendPrivateMsgParams) param).setUserId(sender.getQQ());
             ((OneBotMessage.SendPrivateMsgParams) param).setMessage(message);
         }else {
             ((OneBotMessage.SendGroupMsgParams) param).setGroupId(DataContext.getSender().getGroupId());
@@ -101,9 +106,10 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
             OneBotApiRequest<OneBotMessage.OneBotApiParams> request = new OneBotApiRequest<>();
             request.setParams(message);
             request.setAction(action);
-            session.sendMessage(new TextMessage(new Gson().toJson(request)));
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(request)));
         }
     }
+
 
     /**
      * 关闭连接进入这个方法处理，将session从 list中删除

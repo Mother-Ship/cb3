@@ -50,17 +50,17 @@ public class ClassPathImageCacheService {
     }
 
     public String getImageAsBase64(String imagePath) throws IOException {
-        return imageCache.computeIfAbsent(imagePath + "_base64", key -> {
-            try {
-                ClassPathResource resource = new ClassPathResource("templates/" + imagePath);
-                try (InputStream inputStream = resource.getInputStream()) {
-                    byte[] imageBytes = StreamUtils.copyToByteArray(inputStream);
-                    return Base64.getEncoder().encodeToString(imageBytes);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("无法读取图片: " + imagePath, e);
+
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/" + imagePath);
+            try (InputStream inputStream = resource.getInputStream()) {
+                byte[] imageBytes = StreamUtils.copyToByteArray(inputStream);
+                return Base64.getEncoder().encodeToString(imageBytes);
             }
-        });
+        } catch (IOException e) {
+            throw new RuntimeException("无法读取图片: " + imagePath, e);
+        }
+
     }
 
     // 批量获取图片，用于一次性加载多个图片

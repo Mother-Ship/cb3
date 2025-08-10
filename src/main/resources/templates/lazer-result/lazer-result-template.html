@@ -294,7 +294,7 @@
             line-height: 100%;
         }
 
-        .stats-container-2.std .stat-value.great {
+        .stats-container-2.osu .stat-value.great {
             left: 133px;
             background: linear-gradient(90deg, #00FFAA 0%, #7CF6FF 48.5%, #FF9AD7 100%);
             -webkit-background-clip: text;
@@ -302,24 +302,23 @@
             background-clip: text;
         }
 
-        .stats-container-2.std .stat-value.ok {
+        .stats-container-2.osu .stat-value.ok {
             left: 374px;
             color: #69ee00;
         }
 
-        .stats-container-2.std .stat-value.meh {
+        .stats-container-2.osu .stat-value.meh {
             left: 544px;
             color: #ffb800;
         }
 
-        .stats-container-2.std .stat-value.miss {
+        .stats-container-2.osu .stat-value.miss {
             left: 713px;
             color: #ff0000;
         }
 
 
-
-        .stats-container-2.ctb .stat-value.great {
+        .stats-container-2.fruits .stat-value.great {
             left: 133px;
             background: linear-gradient(90deg, #00FFAA 0%, #7CF6FF 48.5%, #FF9AD7 100%);
             -webkit-background-clip: text;
@@ -327,7 +326,7 @@
             background-clip: text;
         }
 
-        .stats-container-2.ctb .stat-value.miss {
+        .stats-container-2.fruits .stat-value.miss {
             left: 374px;
             color: #ff0000;
         }
@@ -340,6 +339,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
         .stats-container-2.mania .stat-value.great {
             left: 374px;
             color: #ffb800;
@@ -378,12 +378,13 @@
             left: 374px;
             color: #99EB47;
         }
+
         .stats-container-2.taiko .stat-value.miss {
             left: 544px;
             color: #ff0000;
         }
 
-        .stats-container-3.std {
+        .stats-container-3.osu {
             position: absolute;
             display: flex;
             /*水平*/
@@ -392,7 +393,7 @@
             top: 710px;
         }
 
-        .stats-container-3.ctb {
+        .stats-container-3.fruits {
             position: absolute;
             display: flex;
             /*水平*/
@@ -436,7 +437,7 @@
             top: 783px;
         }
 
-        .svg-css-fill{
+        .svg-css-fill {
             margin-left: -5px;
             position: relative;
             width: 37px;
@@ -448,6 +449,7 @@
             filter: drop-shadow(0px 0.928571px 1.85714px rgba(0, 0, 0, 0.25));
 
         }
+
         .mod-name {
             font-family: Torus-Bold;
             position: absolute;
@@ -459,15 +461,19 @@
         .svg-css-fill.diff-reduct svg path {
             fill: #AADD00;
         }
+
         .svg-css-fill.diff-inc svg path {
             fill: #FF6666;
         }
+
         .svg-css-fill.automation svg path {
             fill: #66CCFF;
         }
+
         .svg-css-fill.conversion svg path {
             fill: #8C66FF;
         }
+
         .svg-css-fill.fun svg path {
             fill: #FF66AB;
         }
@@ -480,9 +486,6 @@
             top: 841px;
         }
 
-        .global-rank {
-            position: absolute;
-        }
 
         .avatar-bottom-container {
             position: absolute;
@@ -541,18 +544,6 @@
 
         }
 
-        .global-rank {
-            position: absolute;
-            left: 76px;
-            top: 15px;
-            font-family: 'Torus';
-            font-style: normal;
-            font-weight: 600;
-            font-size: 20px;
-            line-height: 24px;
-            color: #FFFFFF;
-            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
-        }
 
         .ended-at {
             position: absolute;
@@ -640,76 +631,76 @@
                 <div class="combo" th:text="${maxCombo} + 'x'">1234x</div>
             </div>
 
-<!--            <div class="stats-container-2 std" th:if="${mode == 'std'}">-->
-<!--                <div class="stat-value great"-->
-<!--                     th:text="${great}">123-->
-<!--                </div>-->
-<!--                <div class="stat-value ok" th:text="${ok}">123</div>-->
-<!--                <div class="stat-value meh" th:text="${meh}">123</div>-->
-<!--                <div class="stat-value miss" th:text="${miss}">123</div>-->
+            <div class="stats-container-2 osu" th:if="${mode == 'osu'}">
+                <div class="stat-value great"
+                     th:text="${great}">123
+                </div>
+                <div class="stat-value ok" th:text="${ok}">123</div>
+                <div class="stat-value meh" th:text="${meh}">123</div>
+                <div class="stat-value miss" th:text="${miss}">123</div>
 
-<!--            </div>-->
-<!--                        <div class="stats-container-2 mania" th:if="${mode == 'mania'}">-->
-<!--                            <div class="stat-value perfect" th:text="${perfect}">123</div>-->
+            </div>
+            <div class="stats-container-2 mania" th:if="${mode == 'mania'}">
+                <div class="stat-value perfect" th:text="${perfect}">123</div>
 
-<!--                            <div class="stat-value great"-->
-<!--                                 th:text="${great}">123-->
-<!--                            </div>-->
+                <div class="stat-value great"
+                     th:text="${great}">123
+                </div>
 
-<!--                            <div class="stat-value good" th:text="${good}">123</div>-->
-<!--                            <div class="stat-value ok" th:text="${ok}">123</div>-->
-<!--                            <div class="stat-value meh" th:text="${meh}">123</div>-->
-<!--                            <div class="stat-value miss" th:text="${miss}">123</div>-->
-<!--                            -->
-<!--                        </div>-->
+                <div class="stat-value good" th:text="${good}">123</div>
+                <div class="stat-value ok" th:text="${ok}">123</div>
+                <div class="stat-value meh" th:text="${meh}">123</div>
+                <div class="stat-value miss" th:text="${miss}">123</div>
+
+            </div>
 
 
-<!--                        <div class="stats-container-2 ctb" th:if="${mode == 'fruit'}">-->
-<!--                            <div class="stat-value great"-->
-<!--                                 th:text="${great}">123-->
-<!--                            </div>-->
-<!--                            <div class="stat-value miss" th:text="${miss}">123</div>-->
-<!--                        </div>-->
+            <div class="stats-container-2 fruits" th:if="${mode == 'fruits'}">
+                <div class="stat-value great"
+                     th:text="${great}">123
+                </div>
+                <div class="stat-value miss" th:text="${miss}">123</div>
+            </div>
 
-                        <div class="stats-container-2 taiko" th:if="${mode == 'taiko'}">
-                            <div class="stat-value great"
-                                 th:text="${great}">123
-                            </div>
-                            <div class="stat-value ok" th:text="${ok}">123</div>
-                            <div class="stat-value miss" th:text="${miss}">123</div>
+            <div class="stats-container-2 taiko" th:if="${mode == 'taiko'}">
+                <div class="stat-value great"
+                     th:text="${great}">123
+                </div>
+                <div class="stat-value ok" th:text="${ok}">123</div>
+                <div class="stat-value miss" th:text="${miss}">123</div>
 
-                        </div>
+            </div>
 
-<!--            <div class="stats-container-3 std">-->
-<!--                <div class="stat-item" th:if="${sliderEnd != null}">-->
-<!--                    <div class="stat-label">SLIDER END</div>-->
-<!--                    <div class="stat-value" th:text="${sliderEnd}">123</div>-->
-<!--                </div>-->
-<!--                <div class="stat-item" th:if="${sliderTick != null}">-->
-<!--                    <div class="stat-label">SLIDER TICK</div>-->
-<!--                    <div class="stat-value" th:text="${sliderTick}">123</div>-->
-<!--                </div>-->
-<!--                <div class="stat-item" th:if="${spinnerSpin != null}">-->
-<!--                    <div class="stat-label">SPINNER SPIN</div>-->
-<!--                    <div class="stat-value" th:text="${spinnerSpin}">123</div>-->
-<!--                </div>-->
-<!--                <div class="stat-item" th:if="${spinnerBonus != null}">-->
-<!--                    <div class="stat-label">SPINNER BONUS</div>-->
-<!--                    <div class="stat-value" th:text="${spinnerBonus}">123</div>-->
-<!--                </div>-->
+            <div class="stats-container-3 osu" th:if="${mode == 'osu'}">
+                <div class="stat-item" th:if="${sliderEnd != null}">
+                    <div class="stat-label">SLIDER END</div>
+                    <div class="stat-value" th:text="${sliderEnd}">123</div>
+                </div>
+                <div class="stat-item" th:if="${sliderTick != null}">
+                    <div class="stat-label">SLIDER TICK</div>
+                    <div class="stat-value" th:text="${sliderTick}">123</div>
+                </div>
+                <div class="stat-item" th:if="${spinnerSpin != null}">
+                    <div class="stat-label">SPINNER SPIN</div>
+                    <div class="stat-value" th:text="${spinnerSpin}">123</div>
+                </div>
+                <div class="stat-item" th:if="${spinnerBonus != null}">
+                    <div class="stat-label">SPINNER BONUS</div>
+                    <div class="stat-value" th:text="${spinnerBonus}">123</div>
+                </div>
 
-<!--            </div>-->
+            </div>
 
-<!--            <div class="stats-container-3 ctb">-->
-<!--                <div class="stat-item" th:if="${largeDroplet != null}">-->
-<!--                    <div class="stat-label">Large Droplet</div>-->
-<!--                    <div class="stat-value" th:text="${largeDroplet}">123</div>-->
-<!--                </div>-->
-<!--                <div class="stat-item" th:if="${smallDroplet != null}">-->
-<!--                    <div class="stat-label">Small Droplet</div>-->
-<!--                    <div class="stat-value" th:text="${smallDroplet}">123</div>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div class="stats-container-3 fruits" th:if="${mode == 'fruits'}">
+                <div class="stat-item" th:if="${largeDroplet != null}">
+                    <div class="stat-label">Large Droplet</div>
+                    <div class="stat-value" th:text="${largeDroplet}">123</div>
+                </div>
+                <div class="stat-item" th:if="${smallDroplet != null}">
+                    <div class="stat-label">Small Droplet</div>
+                    <div class="stat-value" th:text="${smallDroplet}">123</div>
+                </div>
+            </div>
 
             <div class="mods-list">
                 <div class="svg-css-fill diff-inc">
@@ -738,8 +729,6 @@
             </div>
         </div>
         <div class="player-info-bottom">
-            <div class="global-rank" th:text="'#' + ${globalRank}">#9999</div>
-
             <div class="avatar-bottom-container">
                 <img class="avatar-bottom" th:src="${avatar}" src="https://a.ppy.sh/15650011?1712387510.jpeg"
                      alt="Avatar">

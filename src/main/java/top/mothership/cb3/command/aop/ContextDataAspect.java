@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import top.mothership.cb3.command.constant.ContextDataEnum;
 import top.mothership.cb3.command.context.DataContext;
 import top.mothership.cb3.manager.OsuApiV1Manager;
+import top.mothership.cb3.manager.OsuApiV2Manager;
+import top.mothership.cb3.manager.constant.ApiV2ModeHolder;
 import top.mothership.cb3.mapper.UserDAO;
 import top.mothership.cb3.pojo.domain.UserRoleEntity;
 
@@ -22,16 +24,21 @@ public class ContextDataAspect {
 
     private final UserDAO userDAO;
     private final OsuApiV1Manager osuApiV1Manager;
+    private final OsuApiV2Manager osuApiV2Manager;
 
     @Around("@annotation(needContextData)")
     public Object fillContextData(ProceedingJoinPoint joinPoint, NeedContextData needContextData) throws Throwable {
         // 在方法执行前填充上下文数据
         boolean success = fillContextData(needContextData.value());
         if (!success) {
+            log.warn("填充上下文数据失败，打断命令执行");
             return null;
         }
         try {
             return joinPoint.proceed();
+        } catch (Exception e) {
+            log.error("方法执行异常", e);
+            return null;
         } finally {
             // 方法执行后清理上下文数据
             clearContextData();
@@ -71,7 +78,10 @@ public class ContextDataAspect {
                     DataContext.setApiV1UserInfo(userInfo);
                     break;
                 case BONDED_API_V2_USERINFO:
-//                    DataContext.setApiV2User(DataContext.getApiV2UserInfo());
+                    user = DataContext.getUserRole();
+                    var userInfoV2 = osuApiV2Manager.getUserInfo(
+                            ApiV2ModeHolder.fromInt(user.getMode()), String.valueOf(user.getUserId()));
+                    DataContext.setApiV2User(userInfoV2);
                     break;
             }
         }

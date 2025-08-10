@@ -1,13 +1,13 @@
 package top.mothership.cb3.command.image;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
+import io.github.headlesschrome.ChromiumLoader;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
+import lombok.val;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
@@ -23,9 +23,10 @@ public class ScreenShotService {
 
     @PostConstruct
     public void init() {
-        WebDriverManager.chromedriver().setup();
+//        WebDriverManager.chromedriver().setup();
+        val loader = new ChromiumLoader();
 
-        ChromeOptions options = new ChromeOptions();
+        val options = loader.downloadAndLoad();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -36,10 +37,17 @@ public class ScreenShotService {
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().pageLoadTimeout(Duration.of(30, ChronoUnit.SECONDS));
+
+        // 注册关闭钩子
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (driver != null) {
+                driver.quit();
+            }
+        }));
     }
 
     @SneakyThrows
-    public byte[] htmlToImageWithLocalResources(String htmlContent){
+    public byte[] htmlToImageWithLocalResources(String htmlContent) {
         // 确保HTML中的本地资源能正确加载
         Path tempDir = Files.createTempDirectory("result");
         Path htmlFile = tempDir.resolve(UUID.randomUUID() + ".html");

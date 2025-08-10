@@ -1,6 +1,8 @@
 package top.mothership.cb3.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -13,6 +15,7 @@ import top.mothership.cb3.config.CustomPropertiesConfig;
 import top.mothership.cb3.pojo.osu.apiv2.OAuthCredentials;
 import top.mothership.cb3.pojo.osu.apiv2.request.UserScoresRequest;
 import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2Score;
+import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2User;
 import top.mothership.cb3.pojo.osu.apiv2.response.TokenResponse;
 
 import java.time.LocalDateTime;
@@ -28,6 +31,8 @@ public class OsuApiV2Manager {
     CustomPropertiesConfig propertiesConfig;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    ObjectMapper objectMapper;
 
 
     private final OAuthCredentials credentials = new OAuthCredentials();
@@ -75,10 +80,6 @@ public class OsuApiV2Manager {
      * 获取有效的访问令牌
      */
     public String getValidAccessToken() {
-        if (credentials == null) {
-            throw new IllegalStateException("OAuth credentials not initialized");
-        }
-
         if (credentials.isTokenExpired()) {
             refreshAccessToken();
         }
@@ -100,6 +101,22 @@ public class OsuApiV2Manager {
     public List<ApiV2Score.ScoreLazer> getUserRecentScores(UserScoresRequest request) {
         return getUserScores(request, "recent");
     }
+    /**
+     * 获取用户信息
+     *
+     */
+    public ApiV2User.User getUserInfo(String mode, String userId) {
+        String url = OSU_API_BASE_URL + "/users/" + userId;
+        if (mode != null) {
+            url += "/" + mode;
+        }
+
+        HttpHeaders headers = generateHeaders();
+
+        return executeHttpGet(url, headers, new ParameterizedTypeReference<>() {
+        });
+    }
+
     /**
      * 获取用户成绩通用方法
      */
@@ -133,38 +150,44 @@ public class OsuApiV2Manager {
         String url = uriBuilder.build().toUriString();
         log.info("获取用户成绩，拼接的URL：{}", url);
 
-        // 准备请求头
+        HttpHeaders headers = generateHeaders();
+
+        return executeHttpGet(url, headers, new ParameterizedTypeReference<>() {
+        });
+    }
+
+    @NotNull
+    private HttpHeaders generateHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
         headers.set("Authorization", "Bearer " + getValidAccessToken());
         headers.set("x-api-version", "20220705");
+        return headers;
+    }
 
-
+    /**
+     * 执行HTTP GET请求的通用方法
+     */
+    private <T> T executeHttpGet(String url, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         HttpEntity<?> entity = new HttpEntity<>(headers);
-
-
+        
         try {
-            ResponseEntity<List<ApiV2Score.ScoreLazer>> response = restTemplate.exchange(
+            ResponseEntity<T> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     entity,
-                    new ParameterizedTypeReference<>() {
-                    }
+                    responseType
             );
-
+            
             if (response.getStatusCode() == HttpStatus.OK) {
-                List<ApiV2Score.ScoreLazer> scores = response.getBody();
-                log.info("成功获取 {} 条用户{}类型的成绩",
-                        scores != null ? scores.size() : 0, scoreType);
-                return scores;
+                return response.getBody();
             } else {
-                log.error("获取用户成绩失败: {}", response.getStatusCode());
-                throw new RuntimeException("从osu! API获取用户成绩失败");
+                log.error("HTTP GET请求失败: {}", response.getStatusCode());
+                throw new RuntimeException("HTTP GET请求失败: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            System.out.println("发送HTTP请求" + url +  entity);
-            log.error("获取用户成绩时发生错误: ", e);
-            throw new RuntimeException("从osu! API获取用户成绩时发生错误", e);
+            log.error("执行HTTP GET请求时发生错误: ", e);
+            throw new RuntimeException("执行HTTP GET请求时发生错误", e);
         }
     }
 
