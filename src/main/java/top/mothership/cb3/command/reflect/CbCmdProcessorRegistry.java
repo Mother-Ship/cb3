@@ -59,6 +59,13 @@ public class CbCmdProcessorRegistry {
                     .parameter(argumentText)
                     .build();
         }
+        // 如果命令处理器没有入参，则直接返回
+        if (method.getParameterTypes().length == 0) {
+            return CbCmdProcessorInfo.builder()
+                    .className(method.getDeclaringClass().getName())
+                    .methodName(method.getName())
+                    .build();
+        }
 
         //否则从命令文本中解析出参数对象
         Class<?> parameterClz = method.getParameterTypes()[0];
@@ -77,8 +84,15 @@ public class CbCmdProcessorRegistry {
     public void invokeProcessor(CbCmdProcessorInfo info) {
         Class<?> clz = Class.forName(info.getClassName());
         Object o = applicationContext.getBean(clz);
-        Method m = clz.getMethod(info.getMethodName(), info.getParameterType());
-        m.invoke(o, info.getParameter());
+
+        if (info.getParameter() == null){
+            Method m = clz.getMethod(info.getMethodName());
+            m.invoke(o);
+        }else {
+            Method m = clz.getMethod(info.getMethodName(), info.getParameterType());
+            m.invoke(o, info.getParameter());
+        }
+
     }
 
     /**
