@@ -51,7 +51,7 @@ public class ImportTask {
         }, 0, 1, TimeUnit.MINUTES);
     }
 
-    @Scheduled(cron = "0 59 22 * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     @SneakyThrows
     @Async
     public void importUserInfo() {
