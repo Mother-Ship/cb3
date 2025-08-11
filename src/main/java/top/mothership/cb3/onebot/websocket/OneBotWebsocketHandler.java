@@ -27,16 +27,10 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
     //用来保存连接进来session
     private static final Map<String, WebSocketSession> SESSION_MAP = new ConcurrentHashMap<>();
     private static final Map<String, String> RESPONSE_MAP = new ConcurrentHashMap<>();
+    private static ObjectMapper objectMapper;
     private final ExecutorService fixedThreadPool = Executors.newFixedThreadPool(100);
     @Autowired
     private OneBotMessageHandler oneBotMessageHandler;
-
-    private static ObjectMapper objectMapper;
-    @Autowired
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        OneBotWebsocketHandler.objectMapper = objectMapper;
-    }
-
 
     @SneakyThrows
     public static String callApi(Long selfId, OneBotApiRequest request) {
@@ -62,11 +56,11 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
 
     public static void sendMessage(OneBotContextData sender, String message) {
         OneBotMessage.OneBotApiParams param = new OneBotMessage.SendGroupMsgParams();
-        if (sender.getGroupId() == null){
+        if (sender.getGroupId() == null) {
             param = new OneBotMessage.SendPrivateMsgParams();
             ((OneBotMessage.SendPrivateMsgParams) param).setUserId(sender.getQQ());
             ((OneBotMessage.SendPrivateMsgParams) param).setMessage(message);
-        }else {
+        } else {
             ((OneBotMessage.SendGroupMsgParams) param).setGroupId(DataContext.getSender().getGroupId());
             ((OneBotMessage.SendGroupMsgParams) param).setMessage(message);
         }
@@ -74,18 +68,8 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
         OneBotWebsocketHandler.sendMessage(sender.getSelfId(), param);
     }
 
-
     public static void sendImage(OneBotContextData sender, String imageBase64) {
-        OneBotMessage.OneBotApiParams param = new OneBotMessage.SendGroupMsgParams();
-        if (sender.getGroupId() == null){
-            param = new OneBotMessage.SendPrivateMsgParams();
-            ((OneBotMessage.SendPrivateMsgParams) param).setMessage("[CQ:image,file=base64://" + imageBase64 + "]");
-        }else {
-            ((OneBotMessage.SendGroupMsgParams) param).setGroupId(DataContext.getSender().getGroupId());
-            ((OneBotMessage.SendGroupMsgParams) param).setMessage("[CQ:image,file=base64://" + imageBase64 + "]");
-        }
-
-        OneBotWebsocketHandler.sendMessage(sender.getSelfId(), param);
+        sendMessage(sender, "[CQ:image,file=base64://" + imageBase64 + "]");
     }
 
     @SneakyThrows
@@ -110,6 +94,10 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
         }
     }
 
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        OneBotWebsocketHandler.objectMapper = objectMapper;
+    }
 
     /**
      * 关闭连接进入这个方法处理，将session从 list中删除

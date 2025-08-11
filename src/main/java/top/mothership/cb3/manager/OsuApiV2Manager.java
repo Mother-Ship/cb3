@@ -20,22 +20,20 @@ import top.mothership.cb3.pojo.osu.apiv2.response.TokenResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Component
 @Slf4j
 public class OsuApiV2Manager {
 
     private static final String OSU_TOKEN_URL = "https://osu.ppy.sh/oauth/token";
     private static final String OSU_API_BASE_URL = "https://osu.ppy.sh/api/v2";
-
+    private final OAuthCredentials credentials = new OAuthCredentials();
     @Autowired
     CustomPropertiesConfig propertiesConfig;
     @Autowired
-    private RestTemplate restTemplate;
-    @Autowired
     ObjectMapper objectMapper;
-
-
-    private final OAuthCredentials credentials = new OAuthCredentials();
+    @Autowired
+    private RestTemplate restTemplate;
 
     private void updateCredentials(TokenResponse tokenResponse) {
         credentials.setAccessToken(tokenResponse.getAccessToken());
@@ -83,7 +81,7 @@ public class OsuApiV2Manager {
         if (credentials.isTokenExpired()) {
             refreshAccessToken();
         }
-        log.info("获取API V2 Access Token成功：{}",credentials.getAccessToken());
+        log.info("获取API V2 Access Token成功：{}", credentials.getAccessToken());
         return credentials.getAccessToken();
     }
 
@@ -101,10 +99,14 @@ public class OsuApiV2Manager {
     public List<ApiV2Score.ScoreLazer> getUserRecentScores(UserScoresRequest request) {
         return getUserScores(request, "recent");
     }
+
     /**
      * 获取用户信息
-     *
      */
+    public ApiV2User.User getUserInfo(String userId) {
+        return getUserInfo(null, userId);
+    }
+
     public ApiV2User.User getUserInfo(String mode, String userId) {
         String url = OSU_API_BASE_URL + "/users/" + userId;
         if (mode != null) {
@@ -170,7 +172,7 @@ public class OsuApiV2Manager {
      */
     private <T> T executeHttpGet(String url, HttpHeaders headers, ParameterizedTypeReference<T> responseType) {
         HttpEntity<?> entity = new HttpEntity<>(headers);
-        
+
         try {
             ResponseEntity<T> response = restTemplate.exchange(
                     url,
@@ -178,7 +180,7 @@ public class OsuApiV2Manager {
                     entity,
                     responseType
             );
-            
+
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();
             } else {

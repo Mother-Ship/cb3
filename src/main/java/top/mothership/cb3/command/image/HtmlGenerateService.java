@@ -1,14 +1,19 @@
 package top.mothership.cb3.command.image;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import top.mothership.cb3.manager.constant.ApiV2ModeHolder;
+import top.mothership.cb3.command.pojo.ResultScreenMod;
+import top.mothership.cb3.config.AppProperties;
 import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2Score;
+import top.mothership.cb3.util.ApiV2ModTypeHolder;
+import top.mothership.cb3.util.ApiV2ModeHolder;
 
+import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,16 +24,18 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class HtmlGenerateService {
 
-    @Autowired
-    private TemplateEngine templateEngine;
 
-    @Autowired
-    private ClassPathImageCacheService classPathImageCacheService;
+    private final TemplateEngine templateEngine;
 
-    @Autowired
-    private BeatmapCoverImageCacheService beatmapCoverImageCacheService;
+    private final ClassPathImageCacheService classPathImageCacheService;
+
+    private final BeatmapCoverImageCacheService beatmapCoverImageCacheService;
+
+    private final AppProperties properties;
+
 
     @SneakyThrows
     public String generateResultHtml(ApiV2Score.ScoreLazer score) {
@@ -40,7 +47,7 @@ public class HtmlGenerateService {
         context.setVariable("artist", score.getBeatmapset().getArtist());
 
         // 谱面状态的背景在CSS里
-        context.setVariable("status", score.getBeatmapset().getStatus());
+        context.setVariable("status", score.getBeatmapset().getStatus().toUpperCase());
 
         context.setVariable("diff", score.getBeatmap().getVersion());
 
@@ -48,6 +55,7 @@ public class HtmlGenerateService {
 
         // 左侧的分数数据
         context.setVariable("score", score.getScore());
+        context.setVariable("isFc", score.isPerfectCombo());
 
         context.setVariable("acc", score.getAccAuto());
         context.setVariable("maxCombo", score.getMaxCombo());
@@ -94,20 +102,25 @@ public class HtmlGenerateService {
         }
 
         // 左下角MOD和multiplier
-        context.setVariable("mods", Arrays.stream(score.getMods())
-                .map(ApiV2Score.Mod::getAcronym)
+        context.setVariable("mods", ArrayUtils.isEmpty(score.getMods()) ?
+                new ResultScreenMod[]{} : Arrays.stream(score.getMods())
+                .map(
+                        mod -> {
+                            var resultScreenMod = new ResultScreenMod();
+
+                            resultScreenMod.setName(mod.getAcronym());
+                            resultScreenMod.setCssClass(ApiV2ModTypeHolder.getCssClass(mod.getAcronym()));
+
+                            if (mod.getSettings() != null && mod.getSettings().has("speed_change")) {
+                                resultScreenMod.setSpeed(
+                                        mod.getSettings().get("speed_change").asText()
+                                );
+                            }
+                            return resultScreenMod;
+                        }
+                )
                 .collect(Collectors.toSet()));
-        var speedChangeMod = Arrays.stream(score.getMods())
-                .filter(ApiV2Score.Mod::isSpeedChangeMod)
-                .findFirst();
-        speedChangeMod.ifPresent(mod -> {
-            log.info("解析出变速MOD: {}", mod);
-            if (mod.getSettings().has("speed_change")) {
-                context.setVariable("mutiplier",
-                        mod.getSettings().get("speed_change").asText()
-                );
-            }
-        });
+
         // 左下角时间
 //       本来设计图这儿有个排名的，但是API不会返回这个字段，所以删了
         // 把UTC时区2025-05-09T23:05:38Z格式的endedAt格式化为+8时区的时间，再格式化为2025/02/03 12:34格式
@@ -126,6 +139,8 @@ public class HtmlGenerateService {
         // 图片
         // 谱面背景（自动下载和缓存，理论上还能做异步加载）
         String imagePath = beatmapCoverImageCacheService.getImage(String.valueOf(score.getBeatmapset().getId()));
+        //TODO 默认背景
+        imagePath = imagePath.replace(Paths.get(properties.getCachePath()).toString(), "..");
         context.setVariable("beatmapCover", imagePath);
 
         // 玩家头像和Cover

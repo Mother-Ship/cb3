@@ -10,9 +10,9 @@ import top.mothership.cb3.command.constant.ContextDataEnum;
 import top.mothership.cb3.command.context.DataContext;
 import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.manager.OsuApiV2Manager;
-import top.mothership.cb3.manager.constant.ApiV2ModeHolder;
 import top.mothership.cb3.mapper.UserDAO;
 import top.mothership.cb3.pojo.domain.UserRoleEntity;
+import top.mothership.cb3.util.ApiV2ModeHolder;
 
 import java.time.LocalDate;
 

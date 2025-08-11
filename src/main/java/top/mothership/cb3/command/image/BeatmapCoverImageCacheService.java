@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import top.mothership.cb3.config.ImageDownloadProperties;
+import top.mothership.cb3.config.AppProperties;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -26,15 +26,15 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BeatmapCoverImageCacheService {
     private static final String IMAGE_EXTENSION = ".jpg";
 
-    private final ImageDownloadProperties properties;
-    
+    private final AppProperties properties;
+
     private final ConcurrentHashMap<String, ReentrantLock> downloadLocks = new ConcurrentHashMap<>();
     private Path cacheDirectory;
 
     @PostConstruct
     public void init() {
         try {
-            cacheDirectory = Paths.get(properties.getCachePath());
+            cacheDirectory = Paths.get(properties.getCachePath() + "/beatmap_covers");
             Files.createDirectories(cacheDirectory);
             log.info("图片缓存目录初始化成功: {}", cacheDirectory.toAbsolutePath());
         } catch (IOException e) {
@@ -45,6 +45,7 @@ public class BeatmapCoverImageCacheService {
 
     /**
      * 获取beatmapset的封面图片
+     *
      * @param beatmapsetId beatmapset ID
      * @return 图片文件路径，如果下载失败返回null
      */
@@ -90,8 +91,9 @@ public class BeatmapCoverImageCacheService {
 
     /**
      * 下载图片到指定路径
+     *
      * @param beatmapsetId beatmapset ID
-     * @param targetPath 目标文件路径
+     * @param targetPath   目标文件路径
      * @return 是否下载成功
      */
     private boolean downloadImage(String beatmapsetId, Path targetPath) {
@@ -151,6 +153,7 @@ public class BeatmapCoverImageCacheService {
 
     /**
      * 清理缓存中的指定图片
+     *
      * @param beatmapsetId beatmapset ID
      * @return 是否清理成功
      */
@@ -176,6 +179,7 @@ public class BeatmapCoverImageCacheService {
 
     /**
      * 获取缓存目录中的文件数量
+     *
      * @return 缓存文件数量
      */
     public long getCacheFileCount() {
@@ -191,6 +195,7 @@ public class BeatmapCoverImageCacheService {
 
     /**
      * 检查图片是否已缓存
+     *
      * @param beatmapsetId beatmapset ID
      * @return 是否已缓存
      */

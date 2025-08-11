@@ -1,4 +1,4 @@
-package top.mothership.cb3.manager.constant;
+package top.mothership.cb3.util;
 
 public class ApiV2ModeHolder {
     public static final String MANIA = "mania";

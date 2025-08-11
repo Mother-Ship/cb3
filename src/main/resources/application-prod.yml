@@ -1,4 +1,3 @@
-image:
-  download:
-    cache-path: "/var/app/cache/images"
-    max-cache-size: 5000
+app:
+  cache-path: "./cache"
+  max-cache-cover-size: 1000

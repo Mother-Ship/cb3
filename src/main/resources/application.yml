@@ -11,7 +11,7 @@ spring:
     suffix: .html
 server:
   port: 12450
-image:
-  download:
-    cache-path: "./cache/images/dev"
-    max-cache-size: 1000
+app:
+  cache-path: "./cache"
+  max-cache-cover-size: 1000
+

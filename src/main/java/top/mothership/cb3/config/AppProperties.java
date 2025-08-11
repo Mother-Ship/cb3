@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
-@ConfigurationProperties(prefix = "image.download")
-public class ImageDownloadProperties {
+@ConfigurationProperties(prefix = "app")
+public class AppProperties {
     private String cachePath;
-    private int maxCacheSize;
+    private int maxCacheCoverSize;
 }

@@ -12,11 +12,11 @@ import top.mothership.cb3.command.image.ScreenShotService;
 import top.mothership.cb3.command.reflect.CbCmdProcessor;
 import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.manager.OsuApiV2Manager;
-import top.mothership.cb3.manager.constant.ApiV2ModeHolder;
 import top.mothership.cb3.onebot.websocket.OneBotWebsocketHandler;
 import top.mothership.cb3.pojo.osu.apiv2.request.UserScoresRequest;
 import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2Score;
 import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2User;
+import top.mothership.cb3.util.ApiV2ModeHolder;
 
 import java.util.Base64;
 
@@ -71,15 +71,16 @@ public class RecentCommandHandler {
         var creatorId = recentScore.getBeatmap().getUserId();
         var dummyMapper = new ApiV2User.User();
 
-        var userInfo = osuApiV1Manager.getUserInfo(0, String.valueOf(creatorId));
+        var userInfo = osuApiV2Manager.getUserInfo(String.valueOf(creatorId));
         if (userInfo != null) {
             dummyMapper.setUsername(userInfo.getUsername());
-
         } else {
             log.warn("获取谱面作者信息失败，使用set作者兜底");
             dummyMapper.setUsername(recentScore.getBeatmapset().getCreator());
         }
         recentScore.getBeatmap().setUser(dummyMapper);
+
+
 
         // 补全用户cover
         var apiV2User = DataContext.getApiV2User();

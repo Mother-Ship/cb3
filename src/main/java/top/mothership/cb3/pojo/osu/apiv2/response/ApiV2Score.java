@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import top.mothership.cb3.manager.constant.ApiV2ModeHolder;
+import top.mothership.cb3.util.ApiV2ModeHolder;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static top.mothership.cb3.manager.constant.ApiV2ModeHolder.*;
+import static top.mothership.cb3.util.ApiV2ModeHolder.*;
 
 
 /**

@@ -26,13 +26,13 @@ public class ClassPathImageCacheService {
         try {
             preloadImage("lazer-result/images/lazer-a.svg");
             preloadImage("lazer-result/images/lazer-b.svg");
-            preloadImage("lazer-result/images/lazer-banner-ctb.png");
+            preloadImage("lazer-result/images/lazer-banner-fruits.png");
             preloadImage("lazer-result/images/lazer-banner-mania.png");
-            preloadImage("lazer-result/images/lazer-banner-std.png");
+            preloadImage("lazer-result/images/lazer-banner-osu.png");
             preloadImage("lazer-result/images/lazer-banner-taiko.png");
-            preloadImage("lazer-result/images/lazer-bg-ctb.svg");
+            preloadImage("lazer-result/images/lazer-bg-fruits.svg");
             preloadImage("lazer-result/images/lazer-bg-mania.svg");
-            preloadImage("lazer-result/images/lazer-bg-std.svg");
+            preloadImage("lazer-result/images/lazer-bg-osu.svg");
             preloadImage("lazer-result/images/lazer-bg-taiko.svg");
             preloadImage("lazer-result/images/lazer-c.svg");
             preloadImage("lazer-result/images/lazer-d.svg");
