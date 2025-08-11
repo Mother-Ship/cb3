@@ -55,7 +55,6 @@ public class HtmlGenerateService {
 
         // 左侧的分数数据
         context.setVariable("score", score.getScore());
-        context.setVariable("isFc", score.isPerfectCombo());
 
         context.setVariable("acc", score.getAccAuto());
         context.setVariable("maxCombo", score.getMaxCombo());
@@ -165,7 +164,7 @@ public class HtmlGenerateService {
         );
 
         if (score.isPerfectCombo()) {
-            context.setVariable("fcIcon", images.get("lazer-result/images/lazer-fc.png"));
+            context.setVariable("fcIcon", images.get("lazer-result/images/lazer-fc.svg"));
         }
 
         // 添加图片到模板上下文

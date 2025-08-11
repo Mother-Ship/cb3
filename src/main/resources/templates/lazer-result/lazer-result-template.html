@@ -214,7 +214,7 @@
 
         .score-number {
             position: absolute;
-            left: 67px;
+            right: 1290px;
             top: 310px;
 
             font-family: 'Torus-Light';
@@ -223,7 +223,7 @@
             font-size: 140px;
             line-height: 100%;
 
-            text-align: center;
+            text-align: right;
 
             background: linear-gradient(180deg, #FFFFFF 0%, #B2E5FE 100%), #FFFFFF;
             -webkit-background-clip: text;
@@ -629,7 +629,7 @@
         <div class="score-details">
             <div class="score-main">
                 <div class="score-number" th:text="${#numbers.formatInteger(score, 1, 'COMMA')}">1,234,567</div>
-                <img class="fc-icon" th:if="${isFc}" src="images/lazer-fc.svg" alt="">
+                <img class="fc-icon" th:src="${fcIcon}" src="images/lazer-fc.svg" alt="">
             </div>
             <div class="stats-container-1">
                 <div class="accuracy" th:text="${#numbers.formatDecimal(acc*100, 1, 2)} + '%'">98.76%</div>
