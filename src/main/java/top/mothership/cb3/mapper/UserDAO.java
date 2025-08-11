@@ -118,7 +118,6 @@ public interface UserDAO {
             + "<if test=\"user.speakingCount != null\">speaking_count=#{user.speakingCount},</if>"
             + "<if test=\"user.mode != null\">mode=#{user.mode},</if>"
             + "<if test=\"user.mainRole != null\">main_role=#{user.mainRole},</if>"
-            + "<if test=\"user.useEloBorder != null\">use_elo_border=#{user.useEloBorder},</if>"
             + "<if test=\"user.lastActiveDate != null\">last_active_date=#{user.lastActiveDate},</if>"
             + "<if test=\"user.useLazer != null\">use_lazer=#{user.useLazer},</if>"
             + "</set>"
@@ -142,7 +141,6 @@ public interface UserDAO {
             "#{user.speakingCount}," +
             "#{user.mode}," +
             "#{user.mainRole}," +
-            "#{user.useEloBorder}," +
             "#{user.lastActiveDate}," +
             "#{user.useLazer}" +
             ")")
