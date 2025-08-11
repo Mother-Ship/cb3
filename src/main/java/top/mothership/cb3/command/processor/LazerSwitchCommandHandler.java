@@ -8,11 +8,15 @@ import top.mothership.cb3.command.aop.NeedContextData;
 import top.mothership.cb3.command.constant.ContextDataEnum;
 import top.mothership.cb3.command.context.DataContext;
 import top.mothership.cb3.command.reflect.CbCmdProcessor;
+import top.mothership.cb3.mapper.UserDAO;
+import top.mothership.cb3.onebot.websocket.OneBotWebsocketHandler;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class LazerSwitchCommandHandler {
+
+    private final UserDAO userDAO;
 
     @CbCmdProcessor({"lazer", "stable"})
     @NeedContextData({ContextDataEnum.USER_ROLE})
@@ -26,13 +30,17 @@ public class LazerSwitchCommandHandler {
                 return;
             }
             userRole.setUseLazer(true);
+            userDAO.updateUser(userRole);
             log.info("用户{}已切换为Lazer模式", userRole.getCurrentUname());
+            OneBotWebsocketHandler.sendMessage(sender, "已切换为Lazer模式");
         } else {
             if (!userRole.isUseLazer()) {
                 log.info("用户{}已处于Stable模式，无需切换", userRole.getCurrentUname());
             }
             userRole.setUseLazer(false);
+            userDAO.updateUser(userRole);
             log.info("用户{}已切换为Stable模式", userRole.getCurrentUname());
+            OneBotWebsocketHandler.sendMessage(sender, "已切换为Stable模式");
         }
 
     }

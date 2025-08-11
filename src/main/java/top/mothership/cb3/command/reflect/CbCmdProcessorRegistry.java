@@ -104,7 +104,7 @@ public class CbCmdProcessorRegistry {
             commandName = message.substring(start, end);
         }
 
-        return commandName;
+        return commandName.toLowerCase(Locale.ROOT);
     }
 
     /**
