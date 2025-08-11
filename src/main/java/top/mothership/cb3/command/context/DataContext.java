@@ -7,6 +7,8 @@ import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2User;
 
 public class DataContext {
     private static final ThreadLocal<OneBotContextData> sender = new ThreadLocal<>();
+    private static final ThreadLocal<String> command = new ThreadLocal<>();
+
     private static final ThreadLocal<UserRoleEntity> userRole = new ThreadLocal<>();
     private static final ThreadLocal<ApiV1UserInfoVO> apiV1UserInfo = new ThreadLocal<>();
     private static final ThreadLocal<ApiV2User.User> apiV2User = new ThreadLocal<>();
@@ -18,6 +20,15 @@ public class DataContext {
     public static OneBotContextData getSender() {
         return sender.get();
     }
+
+    public static void setCommand(String senderInfo) {
+        command.set(senderInfo);
+    }
+
+    public static String getCommand() {
+        return command.get();
+    }
+
 
     public static void setUserRole(UserRoleEntity userRoleEntity) {
         userRole.set(userRoleEntity);
@@ -45,6 +56,7 @@ public class DataContext {
 
     public static void clear() {
         sender.remove();
+        command.remove();
         userRole.remove();
         apiV1UserInfo.remove();
         apiV2User.remove();

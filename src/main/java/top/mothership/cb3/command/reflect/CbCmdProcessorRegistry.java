@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import top.mothership.cb3.command.constant.CbCmdPrefix;
+import top.mothership.cb3.command.context.DataContext;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -41,6 +42,7 @@ public class CbCmdProcessorRegistry {
             // 没有感叹号的情况
             return null;
         }
+        DataContext.setCommand(commandName);
 
         Method method = cbCmdProcessorManager.getByCommandName(commandName);
 
@@ -61,7 +63,7 @@ public class CbCmdProcessorRegistry {
         //否则从命令文本中解析出参数对象
         Class<?> parameterClz = method.getParameterTypes()[0];
 
-        Object parameter = getParameterByText(parameterClz,argumentText);
+        Object parameter = getParameterByText(parameterClz, argumentText);
 
         return CbCmdProcessorInfo.builder()
                 .className(method.getDeclaringClass().getName())
@@ -136,7 +138,7 @@ public class CbCmdProcessorRegistry {
 
         Object param = parameterType.getDeclaredConstructor().newInstance();
         // 如果解析出来的参数文本是空的，直接用默认构造函数创建对象返回
-        if (StringUtils.isEmpty(text)){
+        if (StringUtils.isEmpty(text)) {
             return param;
         }
 

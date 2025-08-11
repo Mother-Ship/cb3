@@ -33,14 +33,16 @@ public class RecentCommandHandler {
 
     @CbCmdProcessor({"pr", "recent"})
     @NeedContextData({ContextDataEnum.USER_ROLE, ContextDataEnum.BONDED_API_V2_USERINFO})
-    public void pr(RecentCommandArg command) {
+    public void pr(RecentCommandArg arg) {
         var sender = DataContext.getSender();
         var userRole = DataContext.getUserRole();
 
-        log.info("正在处理{}发送的命令 pr，参数mode：{}，绑定用户{}",
-                sender.getQQ(), command.getMode(), userRole.getCurrentUname());
+        log.info("正在处理{}发送的命令 {}，参数mode：{}，绑定用户{}",
+                sender.getQQ(),
+                DataContext.getCommand(),
+                arg.getMode(), userRole.getCurrentUname());
 
-        var mode = command.getMode() == null ? userRole.getMode() : Integer.valueOf(command.getMode());
+        var mode = arg.getMode() == null ? userRole.getMode() : Integer.valueOf(arg.getMode());
         var apiV2Mode = ApiV2ModeHolder.fromInt(mode);
 
         if (!userRole.isUseLazer()) {
@@ -55,19 +57,33 @@ public class RecentCommandHandler {
                         100, 0,
                         true,
                         false, apiV2Mode));
-
-        var scoreOp = recent.stream().filter(ApiV2Score.ScoreLazer::isLazer).findFirst();
-        if (scoreOp.isEmpty()) {
-            log.info("用户{}没有Lazer最近成绩", userRole.getCurrentUname());
-            OneBotWebsocketHandler.sendMessage(sender,
-                    "玩家" + userRole.getCurrentUname() + "在Lazer的模式" + apiV2Mode + "最近没有游戏记录。");
-            return;
+        ApiV2Score.ScoreLazer recentScore = null;
+        if ("recent".equals(DataContext.getCommand())) {
+            var scoreOp = recent.stream().filter(ApiV2Score.ScoreLazer::isLazer).findFirst();
+            if (scoreOp.isEmpty()) {
+                log.info("用户{}没有Lazer最近成绩", userRole.getCurrentUname());
+                OneBotWebsocketHandler.sendMessage(sender,
+                        "玩家" + userRole.getCurrentUname() + "在Lazer的模式" + apiV2Mode + "最近没有游戏记录。");
+                return;
+            }
+            recentScore = scoreOp.get();
+        }
+        if ("pr".equals(DataContext.getCommand())) {
+            var scoreOp = recent.stream()
+                    .filter(ApiV2Score.ScoreLazer::isLazer)
+                    .filter(ApiV2Score.ScoreLazer::isPassed).findFirst();
+            if (scoreOp.isEmpty()) {
+                log.info("用户{}没有Lazer最近成绩", userRole.getCurrentUname());
+                OneBotWebsocketHandler.sendMessage(sender,
+                        "玩家" + userRole.getCurrentUname() + "在Lazer的模式" + apiV2Mode + "最近没有Pass的游戏记录。");
+                return;
+            }
+            recentScore = scoreOp.get();
         }
 
         log.info("获取到{}的{}模式Lazer最近成绩：{}", userRole.getCurrentUname(), apiV2Mode, recent);
 
         // 补全谱面难度的作者名
-        var recentScore = scoreOp.get();
         var creatorId = recentScore.getBeatmap().getUserId();
         var dummyMapper = new ApiV2User.User();
 
@@ -80,6 +96,8 @@ public class RecentCommandHandler {
         }
         recentScore.getBeatmap().setUser(dummyMapper);
 
+        //TODO fail成绩计算PP
+        recentScore.setPp(recentScore.getPp() == null ? 0.0 : recentScore.getPp());
 
 
         // 补全用户cover
@@ -89,9 +107,12 @@ public class RecentCommandHandler {
         // 生成HTML
         String htmlContent = htmlGeneratorService.generateResultHtml(recentScore);
 
+        log.info("HTML生成完成，开始渲染");
+
         // 转换为图片
         byte[] imageBytes = screenshotService.htmlToImageWithLocalResources(htmlContent);
 
+        log.info("HTML渲染完成，开始发送");
         // 转base64发送
         var imageBase64 = Base64.getEncoder().encodeToString(imageBytes);
 

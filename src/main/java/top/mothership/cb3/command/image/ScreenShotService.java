@@ -132,15 +132,10 @@ public class ScreenShotService {
             Files.writeString(htmlFile, htmlContent);
             // 加载HTML
             driver.get("file://" + htmlFile.toAbsolutePath());
-            // 等待所有资源加载完成
-            Thread.sleep(3000);
             // 截图
             TakesScreenshot screenshot = (TakesScreenshot) driver;
 
             return screenshot.getScreenshotAs(OutputType.BYTES);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("截图过程被中断", e);
         } finally {
             // 清理临时文件
             Files.delete(htmlFile);
