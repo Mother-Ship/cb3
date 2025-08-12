@@ -26,17 +26,23 @@ public class LazerSwitchCommandHandler {
         var command = DataContext.getCommand();
         if (command.equals("lazer")) {
             if (userRole.isUseLazer()) {
+                OneBotWebsocketHandler.sendMessage(sender, "你已经在Lazer模式，无需切换");
                 log.info("用户{}已处于Lazer模式，无需切换", userRole.getCurrentUname());
                 return;
             }
+
+
             userRole.setUseLazer(true);
             userDAO.updateUser(userRole);
             log.info("用户{}已切换为Lazer模式", userRole.getCurrentUname());
             OneBotWebsocketHandler.sendMessage(sender, "已切换为Lazer模式");
         } else {
             if (!userRole.isUseLazer()) {
+                OneBotWebsocketHandler.sendMessage(sender, "你已经在Stable模式，无需切换");
                 log.info("用户{}已处于Stable模式，无需切换", userRole.getCurrentUname());
             }
+
+
             userRole.setUseLazer(false);
             userDAO.updateUser(userRole);
             log.info("用户{}已切换为Stable模式", userRole.getCurrentUname());
