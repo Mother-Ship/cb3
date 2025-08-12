@@ -40,6 +40,7 @@ public class LazerSwitchCommandHandler {
             if (!userRole.isUseLazer()) {
                 OneBotWebsocketHandler.sendMessage(sender, "你已经在Stable模式，无需切换");
                 log.info("用户{}已处于Stable模式，无需切换", userRole.getCurrentUname());
+                return;
             }
 
 
