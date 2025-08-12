@@ -35,49 +35,54 @@ public class CbCmdProcessorRegistry {
     }
 
     public CbCmdProcessorInfo getProcessorInfo(String message) {
+        try {
+            String commandName = getCommandName(message);
 
-        String commandName = getCommandName(message);
+            if (commandName == null) {
+                // 没有感叹号的情况
+                return null;
+            }
+            DataContext.setCommand(commandName);
 
-        if (commandName == null) {
-            // 没有感叹号的情况
+            Method method = cbCmdProcessorManager.getByCommandName(commandName);
+
+            CbCmdProcessor processorInfo = AnnotationUtils.findAnnotation(method, CbCmdProcessor.class);
+
+            var argumentText = getStringParameterByText(message, commandName);
+
+            //如果命令标明了要自己处理参数，而不是依赖注解，则假定命令的入参为String类型
+            if (processorInfo != null && processorInfo.rawParameter()) {
+                return CbCmdProcessorInfo.builder()
+                        .className(method.getDeclaringClass().getName())
+                        .methodName(method.getName())
+                        .parameterType(String.class)
+                        .parameter(argumentText)
+                        .build();
+            }
+            // 如果命令处理器没有入参，则直接返回
+            if (method.getParameterTypes().length == 0) {
+                return CbCmdProcessorInfo.builder()
+                        .className(method.getDeclaringClass().getName())
+                        .methodName(method.getName())
+                        .build();
+            }
+
+            //否则从命令文本中解析出参数对象
+            Class<?> parameterClz = method.getParameterTypes()[0];
+
+            Object parameter = getParameterByText(parameterClz, argumentText);
+
+            return CbCmdProcessorInfo.builder()
+                    .className(method.getDeclaringClass().getName())
+                    .methodName(method.getName())
+                    .parameterType(parameterClz)
+                    .parameter(parameter)
+                    .build();
+        } catch (Exception e) {
+            log.error("解析命令和参数出现异常", e);
             return null;
         }
-        DataContext.setCommand(commandName);
 
-        Method method = cbCmdProcessorManager.getByCommandName(commandName);
-
-        CbCmdProcessor processorInfo = AnnotationUtils.findAnnotation(method, CbCmdProcessor.class);
-
-        var argumentText = getStringParameterByText(message, commandName);
-
-        //如果命令标明了要自己处理参数，而不是依赖注解，则假定命令的入参为String类型
-        if (processorInfo != null && processorInfo.rawParameter()) {
-            return CbCmdProcessorInfo.builder()
-                    .className(method.getDeclaringClass().getName())
-                    .methodName(method.getName())
-                    .parameterType(String.class)
-                    .parameter(argumentText)
-                    .build();
-        }
-        // 如果命令处理器没有入参，则直接返回
-        if (method.getParameterTypes().length == 0) {
-            return CbCmdProcessorInfo.builder()
-                    .className(method.getDeclaringClass().getName())
-                    .methodName(method.getName())
-                    .build();
-        }
-
-        //否则从命令文本中解析出参数对象
-        Class<?> parameterClz = method.getParameterTypes()[0];
-
-        Object parameter = getParameterByText(parameterClz, argumentText);
-
-        return CbCmdProcessorInfo.builder()
-                .className(method.getDeclaringClass().getName())
-                .methodName(method.getName())
-                .parameterType(parameterClz)
-                .parameter(parameter)
-                .build();
     }
 
     @SneakyThrows
@@ -186,7 +191,7 @@ public class CbCmdProcessorRegistry {
 
         String[] split = StringUtils.split(text, String.valueOf(prefix), 2);
 
-        if (split[1].indexOf(prefix) != -1) {
+        if (split.length > 1 && split[1].indexOf(prefix) != -1) {
             log.warn("命令解析错误：命令{}中参数前缀{}重复", text, prefix);
             throw new RuntimeException("命令解析错误：参数前缀重复");
         }
