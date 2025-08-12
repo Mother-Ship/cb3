@@ -10,7 +10,6 @@ import top.mothership.cb3.command.context.DataContext;
 import top.mothership.cb3.command.image.HtmlGenerateService;
 import top.mothership.cb3.command.image.ScreenShotService;
 import top.mothership.cb3.command.reflect.CbCmdProcessor;
-import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.manager.OsuApiV2Manager;
 import top.mothership.cb3.onebot.websocket.OneBotWebsocketHandler;
 import top.mothership.cb3.pojo.osu.apiv2.request.UserScoresRequest;
@@ -28,7 +27,6 @@ public class RecentCommandHandler {
     private final OsuApiV2Manager osuApiV2Manager;
     private final HtmlGenerateService htmlGeneratorService;
     private final ScreenShotService screenshotService;
-    private final OsuApiV1Manager osuApiV1Manager;
 
 
     @CbCmdProcessor({"pr", "recent"})
@@ -53,7 +51,6 @@ public class RecentCommandHandler {
         var recent = osuApiV2Manager.getUserRecentScores(
                 new UserScoresRequest(
                         String.valueOf(userRole.getUserId()),
-                        "recent",
                         100, 0,
                         true,
                         false, apiV2Mode));

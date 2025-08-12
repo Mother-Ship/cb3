@@ -46,6 +46,7 @@ public class ScreenShotService {
         options.addArguments("--disable-gpu");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--force-device-scale-factor=2");
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().pageLoadTimeout(Duration.of(30, ChronoUnit.SECONDS));

@@ -85,7 +85,7 @@ public class ImportTask {
 
             // 如果不满足上述条件，那就看玩家STD模式排名是否小于10000，是则录入
             ApiV1UserInfoEntity nearestUserInfo = userInfoDAO.getNearestUserInfo(0, userId, LocalDate.now().minusDays(2));
-            skip = !(nearestUserInfo == null || nearestUserInfo.getRankedScore() < 10000);
+            skip = !(nearestUserInfo == null || nearestUserInfo.getPpRank() < 10000);
 
             if (!skip) {
                 userMap.put(userId, user);
