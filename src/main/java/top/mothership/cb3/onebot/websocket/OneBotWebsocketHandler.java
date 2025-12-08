@@ -16,6 +16,7 @@ import top.mothership.cb3.onebot.OneBotMessageHandler;
 import top.mothership.cb3.onebot.pojo.*;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +33,28 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
     @Autowired
     private OneBotMessageHandler oneBotMessageHandler;
 
+
+    @SneakyThrows
+    public static GroupMemberListResponse getGroupMembers(Long groupId) {
+
+        OneBotMessage.GetGroupMemberListParams cqMsg = new OneBotMessage.GetGroupMemberListParams();
+        cqMsg.setGroupId(groupId);
+
+        var request = new OneBotApiRequest<OneBotMessage.GetGroupMemberListParams>();
+        request.setAction("get_group_member_list");
+        request.setParams(cqMsg);
+        request.setEcho(UUID.randomUUID().toString());
+        String response = OneBotWebsocketHandler.callApi(1335734629L, request);
+        var data = objectMapper.readValue(response, GroupMemberListResponse.class);
+
+        // 如果报错找不到
+        if (data == null || data.getCode() != 0) {
+            response = OneBotWebsocketHandler.callApi(1020640876L, request);
+            data = objectMapper.readValue(response, GroupMemberListResponse.class);
+        }
+        return data;
+
+    }
     @SneakyThrows
     public static String callApi(Long selfId, OneBotApiRequest request) {
         WebSocketSession session = SESSION_MAP.get(String.valueOf(selfId));
@@ -73,7 +96,7 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
     }
 
     @SneakyThrows
-    private static void sendMessage(Long selfId, OneBotMessage.OneBotApiParams message) {
+    public static void sendMessage(Long selfId, OneBotMessage.OneBotApiParams message) {
 
         String className = message.getClass().getSimpleName();
         String action = switch (className) {

@@ -1,8 +1,8 @@
 package top.mothership.cb3.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import top.mothership.cb3.pojo.domain.UserRoleEntity;
@@ -101,7 +101,8 @@ public class UserRoleDataUtil {
         return user;
     }
 
-    public UserRoleEntity renameUser(UserRoleEntity user, String newName) throws JsonProcessingException {
+    @SneakyThrows
+    public UserRoleEntity renameUser(UserRoleEntity user, String newName) {
         //如果检测到用户改名，取出数据库中的现用名加入到曾用名，并且更新现用名和曾用名
         List<String> legacyUname = objectMapper.readValue(user.getLegacyUname(), new TypeReference<>() {
         });

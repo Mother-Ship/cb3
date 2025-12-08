@@ -7,7 +7,6 @@ import okhttp3.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.mapper.UserDAO;
@@ -51,7 +50,6 @@ public class ImportTask {
         }, 0, 1, TimeUnit.MINUTES);
     }
 
-    @Scheduled(cron = "0 0 4 * * ?")
     @SneakyThrows
     @Async
     public void importUserInfo() {

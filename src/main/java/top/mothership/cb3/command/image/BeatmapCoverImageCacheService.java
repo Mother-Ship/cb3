@@ -97,7 +97,7 @@ public class BeatmapCoverImageCacheService {
      * @return 是否下载成功
      */
     private boolean downloadImage(String beatmapsetId, Path targetPath) {
-        String imageUrl = String.format("%s/%s/covers/raw.jpg", "https://assets.ppy.sh/beatmaps", beatmapsetId);
+        String imageUrl = String.format("%s/%s/covers/fullsize.jpg", "https://assets.ppy.sh/beatmaps", beatmapsetId);
 
         try {
             log.debug("开始下载图片: {} -> {}", imageUrl, targetPath);

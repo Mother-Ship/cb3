@@ -64,6 +64,14 @@ public class OneBotMessage {
         private Long userId;
         private Boolean rejectAddRequest; // 可选，拒绝此人的加群请求
     }
+    // 获取群成员信息参数
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GetGroupMemberListParams implements OneBotApiParams {
+        private Long groupId;
+    }
 
 
 }

@@ -179,7 +179,7 @@
             background: #AAAAAA
         }
 
-        .beatmap-star {
+        #beatmap-star {
             font-family: 'Torus-Bold', serif;
             font-size: 12px;
             line-height: 8px;
@@ -595,7 +595,7 @@
 </head>
 <body>
 <div class="container">
-    <img class="beatmap-cover" th:src="${beatmapCover}" src="https://assets.ppy.sh/beatmaps/13223/covers/raw.jpg"
+    <img class="beatmap-cover" th:src="${beatmapCover}" src="https://assets.ppy.sh/beatmaps/13223/covers/fullsize.jpg"
          alt="Beatmap Cover">
     <img class="banner" th:src="${banner}" src="images/lazer-banner-taiko.png" alt="Banner">
     <img class="bg" th:src="${bg}" src="images/lazer-bg-taiko.svg" alt="Background">
@@ -616,7 +616,7 @@
             <div class="beatmap-artist" th:text="${artist}">Demetori</div>
 
             <div id="beatmap-star-container">
-                <p class="beatmap-star" th:text="'★' + ${star}">★ 5.38</p>
+                <p id="beatmap-star" th:text="'★' + ${star}">★ 5.38</p>
             </div>
 
             <div id="beatmap-diff">
