@@ -44,6 +44,10 @@ public class CheckMP5CardController {
 
 
         for (var qqInfo : mp5GroupMemberList.getData()) {
+            if (qqInfo.getUserId() == 1335734629L || qqInfo.getUserId() == 1020640876L){
+                log.warn("QQ {} 在群 {} 是bot，跳过", qqInfo.getUserId(), qqInfo.getGroupId());
+                continue;
+            }
             //根据QQ获取user和群名片
             UserRoleEntity userRoleEntity = userDAO.getUser(qqInfo.getUserId(), null);
             String card = qqInfo.getCard();
