@@ -96,7 +96,7 @@ public class CheckMP5CardController {
                 var remindMessage = new OneBotMessage.SendGroupMsgParams();
                 remindMessage.setGroupId(136312506L);
                 remindMessage.setMessage("[CQ:at,qq=" + qqInfo.getUserId() + "]" +
-                        " 你好，你还没有绑定你的osu账号哦，请输入!setid {你的osu!用户名}绑定，谢谢配合~");
+                        " 你好，你还没有绑定你的osu账号哦，请输入!setid 你的osu!用户名 来绑定，例如：!setid MotherShip，注意用户名前面有一个空格，谢谢配合~");
                 if (!Objects.equals(outputOnly, "true")) {
                     OneBotWebsocketHandler.sendMessage(1335734629L, remindMessage);
                 }
