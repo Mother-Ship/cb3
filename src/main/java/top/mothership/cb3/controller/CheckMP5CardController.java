@@ -34,17 +34,13 @@ public class CheckMP5CardController {
         StringBuilder sb = new StringBuilder();
 
         var replyMessage = new OneBotMessage.SendGroupMsgParams();
-        replyMessage.setGroupId(136312506L);
-
-
-        if (Objects.equals(outputOnly, "true")) {
-            replyMessage = new OneBotMessage.SendGroupMsgParams();
-            replyMessage.setGroupId(724149648L);
-        }
+        replyMessage.setGroupId(724149648L);
 
 
         for (var qqInfo : mp5GroupMemberList.getData()) {
-            if (qqInfo.getUserId() == 1335734629L || qqInfo.getUserId() == 1020640876L){
+            if (qqInfo.getUserId() == 1335734629L
+                    || qqInfo.getUserId() == 1020640876L
+                    || qqInfo.getUserId() == 3145729213L){
                 log.warn("QQ {} 在群 {} 是bot，跳过", qqInfo.getUserId(), qqInfo.getGroupId());
                 continue;
             }
