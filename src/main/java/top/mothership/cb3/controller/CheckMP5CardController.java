@@ -29,7 +29,7 @@ public class CheckMP5CardController {
     private final UserRoleDataUtil userRoleDataUtil;
 
     @PostMapping("/trigger")
-    public void checkMP5Card(@RequestParam String debug) {
+    public void checkMP5Card(@RequestParam String outputOnly) {
         var mp5GroupMemberList = OneBotWebsocketHandler.getGroupMembers(136312506L);
         StringBuilder sb = new StringBuilder();
 
@@ -37,7 +37,7 @@ public class CheckMP5CardController {
         replyMessage.setGroupId(136312506L);
 
 
-        if (Objects.equals(debug, "true")){
+        if (Objects.equals(outputOnly, "true")) {
             replyMessage = new OneBotMessage.SendGroupMsgParams();
             replyMessage.setGroupId(724149648L);
         }
@@ -69,21 +69,38 @@ public class CheckMP5CardController {
                     // 如果名片为空，则判断昵称
                     if (!isNicknameMatchUsername(qqInfo.getNickname(), currentUsername)) {
                         sb.append("QQ：").append(qqInfo.getUserId())
-                                .append("的id和昵称不一致，osu! id：")
+                                .append("的群名片为空，且id和昵称不一致，osu! id：")
                                 .append(currentUsername)
-                                .append("，昵称：").append(qqInfo.getNickname()).append("\n");
+                                .append("，昵称：").append(qqInfo.getNickname()).append("，已修改名片为ID\n");
+                        log.info("QQ {} 在群 {} 名片为空，且昵称不包含ID，触发修改名片", qqInfo.getUserId(), qqInfo.getGroupId());
+                        if (!Objects.equals(outputOnly, "true")) {
+                            OneBotWebsocketHandler.setGroupCard(qqInfo.getGroupId(), qqInfo.getUserId(), currentUsername);
+                        }
                     }
                 } else {
                     if (!isCardMatchUsername(card, currentUsername)) {
                         sb.append("QQ：").append(qqInfo.getUserId())
                                 .append("的id和名片不一致，osu! id：")
                                 .append(currentUsername)
-                                .append("，群名片：").append(card).append("\n");
+                                .append("，群名片：").append(card).append("，已修改为ID\n");
+                        log.info("QQ {} 在群 {} 名片不包含ID，触发修改名片", qqInfo.getUserId(), qqInfo.getGroupId());
+                        if (!Objects.equals(outputOnly, "true")) {
+                            OneBotWebsocketHandler.setGroupCard(qqInfo.getGroupId(), qqInfo.getUserId(), currentUsername);
+                        }
                     }
                 }
             } else {
                 sb.append("QQ： ").append(qqInfo.getUserId()).append(" 没有绑定id，群名片是：").append(card)
                         .append("，昵称是").append(qqInfo.getNickname()).append("\n");
+                log.info("QQ {} 在群 {} 没有绑定id，触发绑定提醒", qqInfo.getUserId(), qqInfo.getGroupId());
+                var remindMessage = new OneBotMessage.SendGroupMsgParams();
+                remindMessage.setGroupId(136312506L);
+                remindMessage.setMessage("[CQ:at,qq=" + qqInfo.getUserId() + "]" +
+                        " 你好，你还没有绑定你的osu账号哦，请输入!setid {你的osu!用户名}绑定，谢谢配合~");
+                if (!Objects.equals(outputOnly, "true")) {
+                    OneBotWebsocketHandler.sendMessage(1335734629L, remindMessage);
+                }
+
             }
 
         }

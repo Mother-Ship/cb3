@@ -73,5 +73,16 @@ public class OneBotMessage {
         private Long groupId;
     }
 
+    // 修改群成员名片参数
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SetGroupCardParams implements OneBotApiParams {
+        private Long groupId;
+        private Long userId;
+        private String card;
+    }
+
 
 }

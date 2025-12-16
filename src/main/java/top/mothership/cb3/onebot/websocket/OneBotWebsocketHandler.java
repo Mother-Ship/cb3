@@ -55,6 +55,31 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
         return data;
 
     }
+
+    @SneakyThrows
+    public static OneBotApiResponse setGroupCard(Long groupId, Long userId, String card) {
+
+        var cqMsg = new OneBotMessage.SetGroupCardParams();
+        cqMsg.setGroupId(groupId);
+        cqMsg.setCard(card);
+        cqMsg.setUserId(userId);
+
+        var request = new OneBotApiRequest<OneBotMessage.SetGroupCardParams>();
+        request.setAction("set_group_card");
+        request.setParams(cqMsg);
+        request.setEcho(UUID.randomUUID().toString());
+        String response = OneBotWebsocketHandler.callApi(1335734629L, request);
+        var data = objectMapper.readValue(response, OneBotApiResponse.class);
+
+        // 如果报错找不到
+        if (data == null || data.getCode() != 0) {
+            response = OneBotWebsocketHandler.callApi(1020640876L, request);
+            data = objectMapper.readValue(response, OneBotApiResponse.class);
+        }
+        return data;
+
+    }
+
     @SneakyThrows
     public static String callApi(Long selfId, OneBotApiRequest request) {
         WebSocketSession session = SESSION_MAP.get(String.valueOf(selfId));
