@@ -2,11 +2,11 @@ package top.mothership.cb3.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.thymeleaf.util.StringUtils;
 import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.mapper.UserDAO;
 import top.mothership.cb3.onebot.pojo.OneBotMessage;
@@ -64,7 +64,7 @@ public class CheckMP5CardController {
 
                 // 统一使用UserRole表里的用户名进行比较
                 String currentUsername = userRoleEntity.getCurrentUname();
-                if (StringUtils.isEmpty(card)) {
+                if (StringUtils.isBlank(card)) {
                     log.warn("QQ {} 在群 {} 名片为空，判断昵称", qqInfo.getUserId(), qqInfo.getGroupId());
                     // 如果名片为空，则判断昵称
                     if (!isNicknameMatchUsername(qqInfo.getNickname(), currentUsername)) {
