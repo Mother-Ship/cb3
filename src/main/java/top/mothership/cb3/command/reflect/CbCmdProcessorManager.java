@@ -38,7 +38,6 @@ public class CbCmdProcessorManager implements BeanPostProcessor {
         Method m = commandMapping.get(commandName);
         if (m == null) {
             log.warn("命令名称{}未找到对应处理器", commandName);
-            throw new RuntimeException("命令名称" + commandName + "未找到对应处理器");
         }
         return m;
     }

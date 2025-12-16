@@ -45,6 +45,9 @@ public class CbCmdProcessorRegistry {
             DataContext.setCommand(commandName);
 
             Method method = cbCmdProcessorManager.getByCommandName(commandName);
+            if (method == null) {
+                return null;
+            }
 
             CbCmdProcessor processorInfo = AnnotationUtils.findAnnotation(method, CbCmdProcessor.class);
 
