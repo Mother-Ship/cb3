@@ -71,6 +71,7 @@ public class OneBotMessage {
     @AllArgsConstructor
     public static class GetGroupMemberListParams implements OneBotApiParams {
         private Long groupId;
+        private Boolean noCache;
     }
 
     // 修改群成员名片参数

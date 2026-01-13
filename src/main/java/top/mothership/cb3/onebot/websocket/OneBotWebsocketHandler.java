@@ -39,6 +39,7 @@ public class OneBotWebsocketHandler extends TextWebSocketHandler {
 
         OneBotMessage.GetGroupMemberListParams cqMsg = new OneBotMessage.GetGroupMemberListParams();
         cqMsg.setGroupId(groupId);
+        cqMsg.setNoCache(true);
 
         var request = new OneBotApiRequest<OneBotMessage.GetGroupMemberListParams>();
         request.setAction("get_group_member_list");
