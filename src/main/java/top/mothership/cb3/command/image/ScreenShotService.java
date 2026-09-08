@@ -19,7 +19,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -35,11 +37,32 @@ public class ScreenShotService {
 
     private Path cacheDirectory;
 
+    private Path userDataDir;
+
     @PostConstruct
     public void init() {
         val loader = new ChromiumLoader();
 
         val options = loader.downloadAndLoad();
+
+        // ChromiumDownloader 解压后可能没有给附带的可执行文件（如 chrome_crashpad_handler）加执行位，
+        // 导致 Chrome 启动后立即退出。这里在 Linux 上把 Chrome 安装目录下的可执行文件权限补齐。
+        ensureChromeExecutablePermissions(loader);
+
+        // 每次启动使用独立的 user-data-dir，避免残留的 Chrome 进程占用同一目录导致
+        // “user data directory is already in use”。
+        try {
+            cacheDirectory = Paths.get(properties.getCachePath()).toAbsolutePath();
+            Files.createDirectories(cacheDirectory);
+            userDataDir = cacheDirectory.resolve("chrome-profile-" + UUID.randomUUID());
+            Files.createDirectories(userDataDir);
+            options.addArguments("--user-data-dir=" + userDataDir);
+            log.info("缓存目录初始化成功: {}", cacheDirectory);
+        } catch (IOException e) {
+            log.error("创建缓存目录失败: {}", properties.getCachePath(), e);
+            throw new RuntimeException("无法初始化缓存目录", e);
+        }
+
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -50,7 +73,6 @@ public class ScreenShotService {
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().pageLoadTimeout(Duration.of(30, ChronoUnit.SECONDS));
-
 
         // 设置视口大小
         int width = 1920;
@@ -64,26 +86,65 @@ public class ScreenShotService {
         height = Integer.parseInt(windowSize.split(",")[1]);
         driver.manage().window().setSize(new Dimension(width, height));
 
-        try {
-            cacheDirectory = Paths.get(properties.getCachePath());
-            Files.createDirectories(cacheDirectory);
-            log.info("缓存目录初始化成功: {}", cacheDirectory.toAbsolutePath());
-        } catch (IOException e) {
-            log.error("创建缓存目录失败: {}", properties.getCachePath(), e);
-            throw new RuntimeException("无法初始化缓存目录", e);
-        }
-
-
         // 初始化时复制资源文件
         initResources();
 
-
         // 注册关闭钩子
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (driver != null) {
-                driver.quit();
+            try {
+                if (driver != null) {
+                    driver.quit();
+                }
+            } finally {
+                deleteQuietly(userDataDir);
             }
         }));
+    }
+
+    private void ensureChromeExecutablePermissions(ChromiumLoader loader) {
+        String osName = System.getProperty("os.name", "").toLowerCase();
+        if (!osName.contains("linux")) {
+            return;
+        }
+        try {
+            Path chromeBinary = Paths.get(loader.getChromePath()).toAbsolutePath();
+            Path chromeDir = chromeBinary.getParent();
+            if (chromeDir == null || !Files.isDirectory(chromeDir)) {
+                return;
+            }
+            try (Stream<Path> paths = Files.walk(chromeDir)) {
+                paths.filter(Files::isRegularFile).forEach(path -> {
+                    String name = path.getFileName().toString();
+                    if ("chrome".equals(name)
+                            || "chrome_crashpad_handler".equals(name)
+                            || "chrome_sandbox".equals(name)
+                            || "chrome-wrapper".equals(name)
+                            || "chromedriver".equals(name)) {
+                        path.toFile().setExecutable(true, false);
+                    }
+                });
+            }
+            log.info("Chrome 可执行文件权限检查/修复完成: {}", chromeDir);
+        } catch (IOException e) {
+            log.warn("修复 Chrome 可执行文件权限失败", e);
+        }
+    }
+
+    private void deleteQuietly(Path path) {
+        if (path == null || !Files.exists(path)) {
+            return;
+        }
+        try (Stream<Path> paths = Files.walk(path)) {
+            paths.sorted(Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException e) {
+                    log.warn("清理临时目录失败: {}", p, e);
+                }
+            });
+        } catch (IOException e) {
+            log.warn("清理临时目录失败: {}", path, e);
+        }
     }
 
     @SneakyThrows
