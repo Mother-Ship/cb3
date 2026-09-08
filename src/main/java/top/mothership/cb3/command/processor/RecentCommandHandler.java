@@ -9,15 +9,20 @@ import top.mothership.cb3.command.constant.ContextDataEnum;
 import top.mothership.cb3.command.context.DataContext;
 import top.mothership.cb3.command.image.HtmlGenerateService;
 import top.mothership.cb3.command.image.ScreenShotService;
+import top.mothership.cb3.command.pojo.SimulatedPp;
 import top.mothership.cb3.command.reflect.CbCmdProcessor;
 import top.mothership.cb3.manager.OsuApiV2Manager;
+import top.mothership.cb3.manager.PpCalcManager;
 import top.mothership.cb3.onebot.websocket.OneBotWebsocketHandler;
 import top.mothership.cb3.pojo.osu.apiv2.request.UserScoresRequest;
 import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2Score;
 import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2User;
+import top.mothership.cb3.pojo.osu.ppcalc.PpCalcResult;
+import top.mothership.cb3.pojo.osu.ppcalc.PpUserScore;
 import top.mothership.cb3.util.ApiV2ModeHolder;
 
 import java.util.Base64;
+import java.util.function.Function;
 
 @Component
 @Slf4j
@@ -25,6 +30,7 @@ import java.util.Base64;
 public class RecentCommandHandler {
 
     private final OsuApiV2Manager osuApiV2Manager;
+    private final PpCalcManager ppCalcManager;
     private final HtmlGenerateService htmlGeneratorService;
     private final ScreenShotService screenshotService;
 
@@ -94,6 +100,23 @@ public class RecentCommandHandler {
         recentScore.getBeatmap().setUser(dummyMapper);
 
         //TODO fail成绩计算PP
+
+        // 计算实际PP（lazer），顺便拿谱面最大连击，用于模拟FC/SS/98%/95%的PP
+        SimulatedPp simulatedPp = new SimulatedPp();
+        var actualCalcResult = ppCalcManager.calc(recentScore, ppCalcManager.buildActual(recentScore));
+        if (actualCalcResult != null && actualCalcResult.getScoreResult() != null) {
+            // fail成绩API不返回PP，用PP服务计算的结果兜底
+            if (recentScore.getPp() == null) {
+                recentScore.setPp(actualCalcResult.getScoreResult().getPp());
+            }
+            long maxCombo = actualCalcResult.getBeatmapInfo().getMaxCombo();
+            simulatedPp.setFcPp(calcSimulatedPp(recentScore, maxCombo, score -> ppCalcManager.buildFc(score, maxCombo)));
+            simulatedPp.setSsPp(calcSimulatedPp(recentScore, maxCombo, score -> ppCalcManager.buildSs(score, maxCombo)));
+            simulatedPp.setAcc98Pp(calcSimulatedPp(recentScore, maxCombo, score -> ppCalcManager.buildAcc(score, maxCombo, 0.98)));
+            simulatedPp.setAcc95Pp(calcSimulatedPp(recentScore, maxCombo, score -> ppCalcManager.buildAcc(score, maxCombo, 0.95)));
+        } else {
+            log.warn("PP服务不可用，模拟PP不展示");
+        }
         recentScore.setPp(recentScore.getPp() == null ? 0.0 : recentScore.getPp());
 
 
@@ -102,7 +125,7 @@ public class RecentCommandHandler {
         recentScore.getUser().setCover(apiV2User.getCover());
 
         // 生成HTML
-        String htmlContent = htmlGeneratorService.generateResultHtml(recentScore);
+        String htmlContent = htmlGeneratorService.generateResultHtml(recentScore, simulatedPp);
 
         log.info("HTML生成完成，开始渲染");
 
@@ -114,6 +137,18 @@ public class RecentCommandHandler {
         var imageBase64 = Base64.getEncoder().encodeToString(imageBytes);
 
         OneBotWebsocketHandler.sendImage(sender, imageBase64);
+    }
+
+    /**
+     * 构建模拟成绩并调用PP服务，服务不可用时返回null
+     */
+    private Double calcSimulatedPp(ApiV2Score.ScoreLazer score, long maxCombo,
+                                   Function<ApiV2Score.ScoreLazer, PpUserScore> builder) {
+        PpCalcResult result = ppCalcManager.calc(score, builder.apply(score));
+        if (result == null || result.getScoreResult() == null) {
+            return null;
+        }
+        return result.getScoreResult().getPp();
     }
 
 }

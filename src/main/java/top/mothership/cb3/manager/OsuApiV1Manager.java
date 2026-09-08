@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 public class OsuApiV1Manager {
     private static final String API_BASE_URL = "https://osu.ppy.sh/api";
-    private static final OkHttpClient client = new OkHttpClient();
+    private static final OkHttpClient client = new OkHttpClient().newBuilder().build();
 
     @Autowired
     private ObjectMapper objectMapper;

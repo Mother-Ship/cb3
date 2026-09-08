@@ -16,4 +16,9 @@ import org.springframework.stereotype.Component;
 public class AppProperties {
     private String cachePath;
     private int maxCacheCoverSize;
+
+    /**
+     * rosu-pp-js-http PP计算服务地址
+     */
+    private String ppCalcUrl;
 }

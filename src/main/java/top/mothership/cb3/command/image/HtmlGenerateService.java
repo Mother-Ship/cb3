@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import top.mothership.cb3.command.pojo.ResultScreenMod;
+import top.mothership.cb3.command.pojo.SimulatedPp;
 import top.mothership.cb3.config.AppProperties;
 import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2Score;
 import top.mothership.cb3.util.ApiV2ModTypeHolder;
@@ -38,7 +39,7 @@ public class HtmlGenerateService {
 
 
     @SneakyThrows
-    public String generateResultHtml(ApiV2Score.ScoreLazer score) {
+    public String generateResultHtml(ApiV2Score.ScoreLazer score, SimulatedPp simulatedPp) {
         Context context = new Context();
 
         // 左上角的谱面数据
@@ -59,6 +60,12 @@ public class HtmlGenerateService {
         context.setVariable("acc", score.getAccAuto());
         context.setVariable("maxCombo", score.getMaxCombo());
         context.setVariable("pp", score.getPp());
+
+        // 模拟PP（if fc / if ss / 98% / 95%），服务不可用时为null，模板显示--
+        context.setVariable("fcPp", simulatedPp == null ? null : simulatedPp.getFcPp());
+        context.setVariable("ssPp", simulatedPp == null ? null : simulatedPp.getSsPp());
+        context.setVariable("acc98Pp", simulatedPp == null ? null : simulatedPp.getAcc98Pp());
+        context.setVariable("acc95Pp", simulatedPp == null ? null : simulatedPp.getAcc95Pp());
 
         switch (score.getMode()) {
             case ApiV2ModeHolder.OSU -> {

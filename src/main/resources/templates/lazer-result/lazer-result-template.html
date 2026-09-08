@@ -386,6 +386,71 @@
             color: #ff0000;
         }
 
+        .stats-container-4 {
+            position: absolute;
+            top: 660px;
+        }
+
+        .stats-container-4 .sim-item {
+            position: absolute;
+            width: 160px;
+        }
+
+        .stats-container-4 .sim-item.fc {
+            left: 133px;
+        }
+
+        .stats-container-4 .sim-item.ss {
+            left: 374px;
+        }
+
+        .stats-container-4 .sim-item.a98 {
+            left: 544px;
+        }
+
+        .stats-container-4 .sim-item.a95 {
+            left: 713px;
+        }
+
+        /* mania的300/100/50/miss列间距更小，收窄一点避免重叠 */
+        .stats-container-4.mania .sim-item {
+            width: 130px;
+        }
+
+        .stats-container-4.mania .sim-item.fc {
+            left: 374px;
+        }
+
+        .stats-container-4.mania .sim-item.ss {
+            left: 655px;
+        }
+
+        .stats-container-4.mania .sim-item.a98 {
+            left: 797px;
+        }
+
+        .stats-container-4.mania .sim-item.a95 {
+            left: 940px;
+        }
+
+        .stats-container-4 .sim-label {
+            font-size: 16px;
+            line-height: 100%;
+            font-family: 'Torus-Bold';
+            color: #fff;
+        }
+
+        .stats-container-4 .sim-value {
+            margin-top: 6px;
+            font-size: 28px;
+            line-height: 100%;
+            background: linear-gradient(180deg, #FFFFFF 0%, #B2E5FE 100%), #FFFFFF;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
         .stats-container-3.osu {
             position: absolute;
             display: flex;
@@ -675,6 +740,27 @@
                 <div class="stat-value ok" th:text="${ok}">123</div>
                 <div class="stat-value miss" th:text="${miss}">123</div>
 
+            </div>
+
+            <div class="stats-container-4"
+                 th:classappend="${mode == 'mania' ? 'mania' : ''}"
+                 th:if="${fcPp != null}">
+                <div class="sim-item fc">
+                    <div class="sim-label">IF FC</div>
+                    <div class="sim-value" th:text="${#numbers.formatInteger(fcPp, 1)} + 'PP'">123PP</div>
+                </div>
+                <div class="sim-item ss">
+                    <div class="sim-label">IF SS</div>
+                    <div class="sim-value" th:text="${#numbers.formatInteger(ssPp, 1)} + 'PP'">123PP</div>
+                </div>
+                <div class="sim-item a98">
+                    <div class="sim-label">98%</div>
+                    <div class="sim-value" th:text="${#numbers.formatInteger(acc98Pp, 1)} + 'PP'">123PP</div>
+                </div>
+                <div class="sim-item a95">
+                    <div class="sim-label">95%</div>
+                    <div class="sim-value" th:text="${#numbers.formatInteger(acc95Pp, 1)} + 'PP'">123PP</div>
+                </div>
             </div>
 
             <div class="stats-container-3 osu" th:if="${mode == 'osu'}">
