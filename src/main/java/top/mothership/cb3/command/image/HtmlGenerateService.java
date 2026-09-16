@@ -129,13 +129,14 @@ public class HtmlGenerateService {
 
         // 左下角时间
 //       本来设计图这儿有个排名的，但是API不会返回这个字段，所以删了
-        // 把UTC时区2025-05-09T23:05:38Z格式的endedAt格式化为+8时区的时间，再格式化为2025/02/03 12:34格式
-        var endedAtStr = score.getEndedAt();
-        endedAtStr = endedAtStr.substring(0, endedAtStr.length() - 1) + "+08:00";
-        endedAtStr = ZonedDateTime.parse(endedAtStr)
-                .withZoneSameInstant(ZoneId.of("Asia/Shanghai"))
-                .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"));
-        context.setVariable("endedAt", endedAtStr);
+        // 把UTC时区2025-05-09T23:05:38Z格式的endedAt格式化为+8时区的时间
+        var endedAtZoned = ZonedDateTime.parse(score.getEndedAt())
+                .withZoneSameInstant(ZoneId.of("Asia/Shanghai"));
+        context.setVariable("endedAt",
+                endedAtZoned.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
+        // 上方banner右侧时钟里的时间（替换图片里被抹掉的假时间）
+        context.setVariable("endedAtTime",
+                endedAtZoned.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
 
         // 上方banner里的玩家名、模式

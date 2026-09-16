@@ -93,6 +93,20 @@
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
 
+        /* banner右侧时钟里的成绩时间（UTC+8），位置对应原图假时钟的“14:39:37” */
+        .banner-time {
+            position: absolute;
+            left: 1751px;
+            top: 0;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            font-family: "Torus-Light", "Torus", sans-serif;
+            font-size: 19px;
+            line-height: 100%;
+            color: #FFFFFF;
+        }
+
 
         .left-panel {
             width: 1150px;
@@ -649,6 +663,7 @@
             <div class="player-name" th:text="${username}">MotherShip</div>
             <img class="avatar" th:src="${avatar}" src="https://a.ppy.sh/15650011?1712387510.jpeg" alt="Avatar">
         </div>
+        <div class="banner-time" th:text="${endedAtTime}">19:05:21</div>
     </div>
 
     <div class="left-panel">

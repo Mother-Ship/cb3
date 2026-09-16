@@ -1,5 +1,7 @@
 package top.mothership.cb3.pojo.osu.apiv2.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
@@ -465,7 +467,12 @@ public class ApiV2Score {
         @JsonProperty("acronym")
         private String acronym;
 
+        /**
+         * 为null时不参与序列化：rosu-pp 的 GameMod 反序列化要求 acronym 是第一个字段，
+         * 多余的字段（包括 settings:null）都会导致解析失败
+         */
         @JsonProperty("settings")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private ObjectNode settings;
 
         public static Mod fromString(String mod) {
@@ -474,14 +481,22 @@ public class ApiV2Score {
             return modObj;
         }
 
+        /**
+         * 以下三个方法只是Java侧的判断辅助方法，必须排除在Jackson序列化之外，
+         * 否则会生成 classic/visualMod/speedChangeMod 字段并排在 acronym 前面，
+         * 导致 rosu-pp 报 "expected `acronym` as first field"
+         */
+        @JsonIgnore
         public boolean isClassic() {
             return "CL".equals(acronym);
         }
 
+        @JsonIgnore
         public boolean isVisualMod() {
             return "HD".equals(acronym) || "FL".equals(acronym);
         }
 
+        @JsonIgnore
         public boolean isSpeedChangeMod() {
             return "DT".equals(acronym) || "NC".equals(acronym) ||
                     "HT".equals(acronym) || "DC".equals(acronym);
