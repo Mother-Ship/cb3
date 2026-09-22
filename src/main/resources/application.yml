@@ -14,5 +14,9 @@ server:
 app:
   cache-path: "./cache"
   max-cache-cover-size: 1000
-  pp-calc-url: "http://k3.mothership.top:5000"
+  pp-calc-url: "http://192.168.4.34:5000"
+  # osu! API 限流（次/分钟），取值依据见 OsuRateLimiter 注释与线上实测
+  osu-api-v1-rate-per-minute: 600
+  osu-api-v2-rate-per-minute: 1100
+  osu-api-token-rate-per-minute: 60
 

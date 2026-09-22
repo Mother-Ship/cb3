@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import top.mothership.cb3.manager.OsuApiUnavailableException;
 import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.mapper.UserDAO;
 import top.mothership.cb3.onebot.pojo.OneBotMessage;
@@ -51,7 +52,14 @@ public class CheckMP5CardController {
 
             if (userRoleEntity != null) {
                 // 调用API，如果改名则更新UserRole表
-                ApiV1UserInfoVO userinfo = osuApiV1Manager.getUserInfo(0, userRoleEntity.getUserId());
+                ApiV1UserInfoVO userinfo;
+                try {
+                    userinfo = osuApiV1Manager.getUserInfo(0, userRoleEntity.getUserId());
+                } catch (OsuApiUnavailableException e) {
+                    // 接口限流/故障时拿不到数据，绝不能据此把玩家标记为封禁
+                    log.warn("osu! API 暂时不可用，跳过 QQ {} 的改名/封禁检查：{}", qqInfo.getUserId(), e.getMessage());
+                    continue;
+                }
                 if (userinfo == null) {
                     userRoleEntity.setBanned(true);
                     userDAO.updateUser(userRoleEntity);

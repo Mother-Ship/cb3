@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import top.mothership.cb3.manager.OsuApiUnavailableException;
 import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.mapper.UserDAO;
 import top.mothership.cb3.mapper.UserInfoDAO;
@@ -28,10 +29,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class ImportTask {
     private static final OkHttpClient client = new OkHttpClient();
-    // 线程池配置
-    private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // 固定大小线程池
-    private final Semaphore semaphore = new Semaphore(600); // 每分钟最多触发 600 次
-    private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
+
+    /**
+     * 并发度。真正的发送速率由 {@link OsuApiV1Manager} 内部的 {@code OsuRateLimiter}
+     * 统一控制，这里只决定有多少个请求可以同时在“限流器排队 + 网络往返”，不要设大。
+     *
+     * <p>旧实现用 {@code Semaphore(600)}+每分钟补满 1000 的方式限流，等于允许每分钟 1000 次
+     * 突发请求，实测会触发 Cloudflare 1015（HTTP 429）；现改为限流器里均匀放行。</p>
+     */
+    private static final int IMPORT_THREADS = 8;
+
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(IMPORT_THREADS);
+
     @Autowired
     private RedisUserInfoUtil redisUserInfoUtil;
     @Autowired
@@ -43,13 +52,6 @@ public class ImportTask {
     @Autowired
     private UserRoleDataUtil userRoleDataUtil;
 
-    public ImportTask() {
-        // 定时任务：每分钟释放 1000 个许可
-        scheduler.scheduleAtFixedRate(() -> {
-            semaphore.release(1000 - semaphore.availablePermits());
-        }, 0, 1, TimeUnit.MINUTES);
-    }
-
     @SneakyThrows
     @Async
     public void importUserInfo() {
@@ -58,9 +60,12 @@ public class ImportTask {
         redisUserInfoUtil.flushDb();
         userInfoDAO.clearTodayInfo(LocalDate.now().minusDays(1));
 
-        Set<String> bannedList = new LinkedHashSet<>();
+        // 多线程写入，必须用线程安全的集合
+        Set<String> bannedList = Collections.synchronizedSet(new LinkedHashSet<>());
+        Set<String> failedList = Collections.synchronizedSet(new LinkedHashSet<>());
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger boundCount = new AtomicInteger(0);
+        AtomicInteger failedCount = new AtomicInteger(0);
 
         // 先查出所有被查询过的玩家
         List<Integer> list = userDAO.listUserIdByRole(null, false);
@@ -99,6 +104,7 @@ public class ImportTask {
         notifyOldCb(preparedInfo);
 
         // 使用CountDownLatch等待所有线程完成
+        // 注意：latch 必须在提交任务前建好；固定线程池使用无界队列，submit 不会因为队列满而拒绝
         CountDownLatch latch = new CountDownLatch(userMap.size() * 4);
 
         for (Integer userId : userMap.keySet()) {
@@ -108,12 +114,11 @@ public class ImportTask {
                 int finalMode = mode;
                 threadPool.submit(() -> {
                     try {
-                        semaphore.acquire(); // 获取信号量许可
-                        doImportAnUserAndMode(userId, finalMode, userMap.get(userId), bannedList, successCount, boundCount);
+                        doImportAnUserAndMode(userId, finalMode, userMap.get(userId), bannedList, failedList,
+                                successCount, boundCount, failedCount);
                     } catch (Exception e) {
                         log.error("任务执行失败: {}", e.getMessage(), e);
                     } finally {
-                        semaphore.release(); // 释放信号量许可
                         latch.countDown(); // 任务完成后计数器减一
                     }
                 });
@@ -126,7 +131,8 @@ public class ImportTask {
         // 打印结果到日志
         var result = "录入完成，本次录入标明被封禁玩家：" + bannedList +
                 "录入成功玩家： " + successCount.get() +
-                "其中已绑定QQ的玩家：" + boundCount.get();
+                "其中已绑定QQ的玩家：" + boundCount.get() +
+                "因接口限流/故障跳过的请求数：" + failedCount.get() + failedList;
         log.info(result);
 
         // 通知老白菜服务
@@ -154,13 +160,26 @@ public class ImportTask {
         }
     }
 
-    private void doImportAnUserAndMode(Integer userId, int mode, UserRoleEntity user, Set<String> bannedList, AtomicInteger successCount, AtomicInteger boundCount) throws JsonProcessingException {
-        // 原有逻辑保持不变
-        log.info("开始导入玩家{}，模式{}", userId, mode);
-        ApiV1UserInfoVO userinfo = osuApiV1Manager.getUserInfo(mode, userId);
+    private void doImportAnUserAndMode(Integer userId, int mode, UserRoleEntity user, Set<String> bannedList,
+                                       Set<String> failedList, AtomicInteger successCount,
+                                       AtomicInteger boundCount, AtomicInteger failedCount) throws JsonProcessingException {
+        log.debug("开始导入玩家{}，模式{}", userId, mode);
+
+        ApiV1UserInfoVO userinfo;
+        try {
+            // 录入是批量任务，没有用户在等，用 ForImport 版本老实排队等满 Retry-After
+            userinfo = osuApiV1Manager.getUserInfoForImport(mode, userId);
+        } catch (OsuApiUnavailableException e) {
+            // 接口限流/故障时拿不到数据，这和“玩家被封禁”完全是两回事。
+            // 旧代码在这里把失败当成 banned，一次 429 就会误封一大批正常玩家。
+            failedCount.incrementAndGet();
+            failedList.add(user.getCurrentUname() + "(mode " + mode + ")");
+            log.warn("玩家{}模式{}查询失败（接口限流/故障，非封禁），本次跳过：{}", userId, mode, e.getMessage());
+            return;
+        }
 
         if (userinfo == null) {
-            //将本次获取失败的用户直接设为banned
+            // 接口正常返回、但没有该玩家的数据，才认定为被封禁
             if (!user.isBanned()) {
                 user.setBanned(true);
                 log.info("检测到玩家{}被Ban，已登记", user.getUserId());

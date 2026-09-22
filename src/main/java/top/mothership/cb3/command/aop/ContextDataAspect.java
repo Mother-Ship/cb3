@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import top.mothership.cb3.command.constant.ContextDataEnum;
 import top.mothership.cb3.command.context.DataContext;
+import top.mothership.cb3.manager.OsuApiUnavailableException;
 import top.mothership.cb3.manager.OsuApiV1Manager;
 import top.mothership.cb3.manager.OsuApiV2Manager;
 import top.mothership.cb3.mapper.UserDAO;
@@ -46,6 +47,16 @@ public class ContextDataAspect {
     }
 
     private boolean fillContextData(ContextDataEnum[] contextDataEnums) {
+        try {
+            return doFillContextData(contextDataEnums);
+        } catch (OsuApiUnavailableException e) {
+            // osu! API 限流/故障时打断命令执行；注意这不代表玩家被封禁
+            log.warn("osu! API 暂时不可用，打断命令执行：{}", e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean doFillContextData(ContextDataEnum[] contextDataEnums) {
         // 上下文数据填充
         for (ContextDataEnum contextDataEnum : contextDataEnums) {
             log.info("填充上下文数据: {}", contextDataEnum);
