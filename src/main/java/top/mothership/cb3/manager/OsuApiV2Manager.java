@@ -3,6 +3,7 @@ package top.mothership.cb3.manager;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -112,13 +113,17 @@ public class OsuApiV2Manager {
                     }
                     throw new OsuApiUnavailableException("更新 API V2 Token 失败：" + e.getStatusCode(), e);
                 } catch (RestClientException e) {
+                    // e.getMessage() 只说明"提取响应失败"，真因（JSON 解析失败、响应流被截断等）在 cause 里，
+                    // 不打印出来这类故障没法排查。
+                    Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
                     if (attempt < MAX_ATTEMPTS) {
-                        log.warn("更新 API V2 Token 请求异常（第 {}/{} 次尝试）：{}",
-                                attempt, MAX_ATTEMPTS, e.getMessage());
+                        log.warn("更新 API V2 Token 请求异常（第 {}/{} 次尝试）：{}: {}",
+                                attempt, MAX_ATTEMPTS, cause.getClass().getSimpleName(), cause.getMessage());
                         sleep(DEFAULT_BACKOFF);
                         continue;
                     }
-                    throw new OsuApiUnavailableException("更新 API V2 Token 请求异常", e);
+                    throw new OsuApiUnavailableException("更新 API V2 Token 请求异常："
+                            + cause.getClass().getSimpleName() + ": " + cause.getMessage(), e);
                 }
             }
             throw new OsuApiUnavailableException("更新 API V2 Token 失败");
@@ -268,12 +273,14 @@ public class OsuApiV2Manager {
                 // 其余 4xx（如 404 用户不存在）交由上层判断
                 throw e;
             } catch (RestClientException e) {
+                Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
                 if (attempt < MAX_ATTEMPTS) {
-                    log.warn("osu! API v2 请求异常（第 {}/{} 次尝试）：{}", attempt, MAX_ATTEMPTS, e.getMessage());
+                    log.warn("osu! API v2 请求异常（第 {}/{} 次尝试）：{}: {}",
+                            attempt, MAX_ATTEMPTS, cause.getClass().getSimpleName(), cause.getMessage());
                     sleep(DEFAULT_BACKOFF);
                     continue;
                 }
-                throw new OsuApiUnavailableException("osu! API v2 请求异常：" + url, e);
+                throw new OsuApiUnavailableException("osu! API v2 请求异常：" + cause.getMessage(), e);
             }
         }
         throw new OsuApiUnavailableException("osu! API v2 请求失败：" + url);
