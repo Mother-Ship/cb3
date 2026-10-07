@@ -26,7 +26,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 定时修复“误封禁”的玩家。
  *
  * <p>玩家被封禁后仍可能被查询，若这时 osu! API 恰好限流/故障，旧逻辑会把“查不到”误判成“被封禁”。
- * 本任务每小时把数据库里标记为封禁的玩家重新查一遍：只要接口能正常返回数据，就补录当日数据并解除封禁。</p>
+ * 本任务每 4 小时把数据库里标记为封禁的玩家重新查一遍：只要接口能正常返回数据，就补录当日数据并解除封禁。</p>
+ *
+ * <p><b>触发频率</b>：每 4 小时一次（{@code 0 0 *&#47;4 * * ?}）。这个任务与每日录入共用同一份
+ * v1 配额，而被误封的玩家数量通常不多、晚几小时修复也无妨，所以降低频率把配额让给录入任务。</p>
  *
  * <p><b>迁移说明</b>：本任务原位于 cabbageWeb（老白菜）项目，与 cb3 共用同一个 osu! API key。
  * 两个进程各自发送 v1 请求、互不知晓对方的发送量，叠加后持续触发 Cloudflare 1015（HTTP 429）。
@@ -67,7 +70,7 @@ public class FixErrorBannedTask {
     @Autowired
     private UserRoleDataUtil userRoleDataUtil;
 
-    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 0 */4 * * ?")
     public void refreshBannedStatus() {
         if (!running.compareAndSet(false, true)) {
             log.warn("上一次误封修复尚未结束，本次跳过");

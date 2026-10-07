@@ -324,7 +324,13 @@ public class OsuApiV1Manager {
             try {
                 long seconds = Long.parseLong(retryAfter.trim());
                 if (seconds > 0) {
-                    return Duration.ofSeconds(Math.min(seconds, MAX_BACKOFF.toSeconds()));
+                    long capped = Math.min(seconds, MAX_BACKOFF.toSeconds());
+                    // 必须把原始值打出来：如果 Cloudflare 已经把惩罚升级到 30 分钟以上，这里会截断成
+                    // MAX_BACKOFF 提前重试，而之前只打截断后的值，日志里永远看到 1800，根本看不出
+                    // "封禁是被自己提前试探拖长的"。
+                    log.warn("osu! API v1 Retry-After 原始值 {} 秒，本地退避上限 {} 秒，本次实际退避 {} 秒",
+                            seconds, MAX_BACKOFF.toSeconds(), capped);
+                    return Duration.ofSeconds(capped);
                 }
             } catch (NumberFormatException e) {
                 log.warn("无法解析 Retry-After 头：{}", retryAfter);

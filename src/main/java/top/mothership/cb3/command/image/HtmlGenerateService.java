@@ -14,6 +14,8 @@ import top.mothership.cb3.pojo.osu.apiv2.response.ApiV2Score;
 import top.mothership.cb3.util.ApiV2ModTypeHolder;
 import top.mothership.cb3.util.ApiV2ModeHolder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -44,7 +46,7 @@ public class HtmlGenerateService {
 
         // 左上角的谱面数据
         context.setVariable("title", score.getBeatmapset().getTitle());
-        context.setVariable("star", score.getBeatmap().getDifficultyRating());
+        context.setVariable("star", BigDecimal.valueOf(score.getBeatmap().getDifficultyRating()).setScale(2, RoundingMode.HALF_UP));
         context.setVariable("artist", score.getBeatmapset().getArtist());
 
         // 谱面状态的背景在CSS里

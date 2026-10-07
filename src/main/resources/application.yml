@@ -15,8 +15,10 @@ app:
   cache-path: "./cache"
   max-cache-cover-size: 1000
   pp-calc-url: "http://192.168.4.34:5000"
-  # osu! API 限流（次/分钟），取值依据见 OsuRateLimiter 注释与线上实测
-  osu-api-v1-rate-per-minute: 600
+  # osu! API 限流（次/分钟），取值依据见 AppProperties 与 OsuRateLimiter 注释
+  # v1 不是"每分钟次数"限制，而是整个 key 约 5 分钟窗口内 ~1800 次的总量配额（实测），
+  # 所以取 240 留出余量，避免 207 秒就撞上 1015 然后 livelock
+  osu-api-v1-rate-per-minute: 240
   osu-api-v2-rate-per-minute: 1100
   osu-api-token-rate-per-minute: 60
 

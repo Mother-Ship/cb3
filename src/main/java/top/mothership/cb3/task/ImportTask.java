@@ -22,7 +22,10 @@ import top.mothership.cb3.util.UserRoleDataUtil;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -39,7 +42,18 @@ public class ImportTask {
      */
     private static final int IMPORT_THREADS = 8;
 
-    private final ExecutorService threadPool = Executors.newFixedThreadPool(IMPORT_THREADS);
+    /** 仅用于给工作线程编号，让日志里能一眼认出是录入任务的线程 */
+    private static final AtomicInteger THREAD_COUNTER = new AtomicInteger(0);
+
+    /**
+     * 命名工作线程：默认的 {@code pool-N-thread-M} 在日志里无法区分是录入任务、
+     * OneBot 消息处理还是别的线程池，排查限流来源时非常费劲。
+     */
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(IMPORT_THREADS, r -> {
+        Thread thread = new Thread(r, "import-user-info-task-" + THREAD_COUNTER.incrementAndGet());
+        thread.setDaemon(true);
+        return thread;
+    });
 
     @Autowired
     private RedisUserInfoUtil redisUserInfoUtil;
